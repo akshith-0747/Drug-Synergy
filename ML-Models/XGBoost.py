@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(
 DATA_PATH = os.path.join(
     BASE_DIR,
     "data",
-    "ml_ready_dataset_clean.csv"
+    "drs_ml_ready_dataset.csv"
 )
 
 MODEL_DIR = os.path.join(
@@ -32,26 +32,35 @@ MODEL_DIR = os.path.join(
     "models"
 )
 
+RESULTS_PATH = os.path.join(
+    BASE_DIR,
+    "data",
+    "drs_evaluation_results.csv"
+)
+
 
 # ============================================================
 # 2. START
 # ============================================================
 
-print("============================================")
+print("=" * 60)
 print("DRUG SYNERGY PREDICTION")
-print("XGBOOST MODEL EVALUATION")
-print("============================================")
+print("DRS XGBOOST MODEL EVALUATION")
+print("=" * 60)
 
 
 # ============================================================
 # 3. LOAD DATASET
 # ============================================================
 
-print("\nLoading cleaned ML-ready dataset...")
+print("\nLoading DRS ML-ready dataset...")
 
-df = pd.read_csv(
-    DATA_PATH
-)
+if not os.path.exists(DATA_PATH):
+    raise FileNotFoundError(
+        f"\nDRS dataset not found:\n{DATA_PATH}"
+    )
+
+df = pd.read_csv(DATA_PATH)
 
 print("Dataset loaded successfully!")
 print("Dataset shape:", df.shape)
@@ -76,167 +85,169 @@ print(target_columns)
 # 5. DATA CHECK
 # ============================================================
 
-print("\n============================================")
+print("\n" + "=" * 60)
 print("DATA CHECK")
-print("============================================")
+print("=" * 60)
 
-missing_values = (
-    df.isnull().sum().sum()
-)
+missing_values = df.isnull().sum().sum()
+duplicate_rows = df.duplicated().sum()
 
-duplicate_rows = (
-    df.duplicated().sum()
-)
-
-print(
-    "Missing values:",
-    missing_values
-)
-
-print(
-    "Duplicate rows:",
-    duplicate_rows
-)
-
+print("Missing values:", missing_values)
+print("Duplicate rows:", duplicate_rows)
 
 if missing_values > 0:
 
-    print(
-        "\nRemoving rows containing "
-        "missing values..."
-    )
+    print("\nRemoving rows containing missing values...")
 
     df = df.dropna()
 
+if duplicate_rows > 0:
 
-print(
-    "Final dataset shape:",
-    df.shape
-)
+    print("\nRemoving duplicate rows...")
+
+    df = df.drop_duplicates()
+
+print("\nFinal dataset shape:", df.shape)
 
 
 # ============================================================
-# 6. FEATURES AND TARGETS
+# 6. IDENTIFY DRS FEATURES
 # ============================================================
 
-X = df.drop(
-    columns=target_columns
-)
+print("\n" + "=" * 60)
+print("DRS FEATURE INFORMATION")
+print("=" * 60)
 
-y = df[
-    target_columns
+
+drs_feature_columns = [
+    column
+    for column in df.columns
+    if column.startswith("Drug1_DRS_PC")
+    or column.startswith("Drug2_DRS_PC")
 ]
 
 
-print("\n============================================")
-print("FEATURE INFORMATION")
-print("============================================")
-
 print(
-    "Number of samples:",
-    X.shape[0]
+    "Number of DRS features:",
+    len(drs_feature_columns)
 )
 
-print(
-    "Number of features:",
-    X.shape[1]
-)
+print("\nDRS features:")
+
+for column in drs_feature_columns:
+    print(column)
+
+
+if len(drs_feature_columns) == 0:
+
+    raise ValueError(
+        "\nNo DRS feature columns were found."
+    )
 
 
 # ============================================================
-# 7. LOAD FEATURE COLUMNS
+# 7. FEATURES AND TARGETS
 # ============================================================
 
-print("\n============================================")
-print("LOADING FEATURE COLUMNS")
-print("============================================")
+X = df[drs_feature_columns]
+
+y = df[target_columns]
+
+
+print("\nNumber of samples:", X.shape[0])
+print("Number of DRS features:", X.shape[1])
+
+
+# ============================================================
+# 8. LOAD SAVED FEATURE COLUMNS
+# ============================================================
+
+print("\n" + "=" * 60)
+print("LOADING DRS FEATURE COLUMNS")
+print("=" * 60)
+
 
 feature_columns_path = os.path.join(
     MODEL_DIR,
-    "feature_columns.pkl"
+    "drs_feature_columns.pkl"
 )
 
 
-if not os.path.exists(
-    feature_columns_path
-):
-
-    print(
-        "\nERROR: feature_columns.pkl not found."
-    )
-
-    print(
-        feature_columns_path
-    )
+if not os.path.exists(feature_columns_path):
 
     raise FileNotFoundError(
-        feature_columns_path
+        f"\nDRS feature columns file not found:\n"
+        f"{feature_columns_path}"
     )
 
 
-feature_columns = joblib.load(
+saved_feature_columns = joblib.load(
     feature_columns_path
 )
 
 
 print(
-    "Saved feature columns loaded."
+    "Saved DRS feature columns loaded."
 )
 
 print(
     "Number of saved features:",
-    len(feature_columns)
+    len(saved_feature_columns)
 )
 
 
 # ============================================================
-# 8. CHECK FEATURE ORDER
+# 9. CHECK FEATURE ORDER
 # ============================================================
 
-print("\n============================================")
+print("\n" + "=" * 60)
 print("CHECKING FEATURE ORDER")
-print("============================================")
+print("=" * 60)
 
 
-if list(X.columns) != list(
-    feature_columns
-):
+missing_features = [
+    column
+    for column in saved_feature_columns
+    if column not in X.columns
+]
 
-    print(
-        "Feature order does not match."
+
+if len(missing_features) > 0:
+
+    print("\nERROR: Missing DRS features:")
+
+    for column in missing_features:
+        print("-", column)
+
+    raise ValueError(
+        "Dataset does not contain all saved DRS features."
     )
 
-    print(
-        "Reordering features..."
-    )
 
-    X = X[
-        feature_columns
-    ]
+X = X[
+    saved_feature_columns
+]
 
-else:
 
-    print(
-        "Feature order is correct."
-    )
+print(
+    "Feature order is correct."
+)
 
 
 # ============================================================
-# 9. TRAIN-TEST SPLIT
+# 10. TRAIN-TEST SPLIT
 # ============================================================
 
-print("\n============================================")
+print("\n" + "=" * 60)
 print("TRAIN-TEST SPLIT")
-print("============================================")
+print("=" * 60)
 
 
-X_train, X_test, y_train, y_test = (
-    train_test_split(
-        X,
-        y,
-        test_size=0.20,
-        random_state=42
-    )
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
 )
 
 
@@ -252,32 +263,32 @@ print(
 
 
 # ============================================================
-# 10. XGBOOST MODEL FILES
+# 11. DRS XGBOOST MODEL FILES
 # ============================================================
 
 model_files = {
 
     "ZIP":
-        "ZIP_best_model.pkl",
+        "drs_zip_best_model.pkl",
 
     "Bliss":
-        "Bliss_best_model.pkl",
+        "drs_bliss_best_model.pkl",
 
     "Loewe":
-        "Loewe_best_model.pkl",
+        "drs_loewe_best_model.pkl",
 
     "HSA":
-        "HSA_best_model.pkl"
+        "drs_hsa_best_model.pkl"
 }
 
 
 # ============================================================
-# 11. MODEL EVALUATION
+# 12. MODEL EVALUATION
 # ============================================================
 
-print("\n============================================")
-print("XGBOOST MODEL EVALUATION")
-print("============================================")
+print("\n" + "=" * 60)
+print("DRS XGBOOST MODEL EVALUATION")
+print("=" * 60)
 
 
 evaluation_results = []
@@ -286,9 +297,9 @@ evaluation_results = []
 for target in target_columns:
 
     print("\n")
-    print("============================================")
-    print(f"EVALUATING {target}")
-    print("============================================")
+    print("=" * 60)
+    print(f"EVALUATING DRS {target}")
+    print("=" * 60)
 
 
     # --------------------------------------------------------
@@ -301,38 +312,28 @@ for target in target_columns:
     )
 
 
-    # --------------------------------------------------------
-    # CHECK MODEL
-    # --------------------------------------------------------
-
-    if not os.path.exists(
-        model_path
-    ):
+    if not os.path.exists(model_path):
 
         print(
             "\nERROR: Model not found:"
         )
 
-        print(
+        print(model_path)
+
+        raise FileNotFoundError(
             model_path
         )
 
-        continue
-
 
     # --------------------------------------------------------
-    # LOAD XGBOOST MODEL
+    # LOAD MODEL
     # --------------------------------------------------------
 
-    print(
-        "Loading XGBoost model..."
-    )
-
+    print("\nLoading DRS XGBoost model...")
 
     model = joblib.load(
         model_path
     )
-
 
     print(
         "Model loaded successfully."
@@ -347,10 +348,18 @@ for target in target_columns:
         "Generating predictions..."
     )
 
-
     predictions = model.predict(
         X_test
     )
+
+
+    # --------------------------------------------------------
+    # ACTUAL VALUES
+    # --------------------------------------------------------
+
+    actual_values = y_test[
+        target
+    ].values
 
 
     # --------------------------------------------------------
@@ -358,7 +367,7 @@ for target in target_columns:
     # --------------------------------------------------------
 
     mae = mean_absolute_error(
-        y_test[target],
+        actual_values,
         predictions
     )
 
@@ -368,7 +377,7 @@ for target in target_columns:
     # --------------------------------------------------------
 
     mse = mean_squared_error(
-        y_test[target],
+        actual_values,
         predictions
     )
 
@@ -383,11 +392,11 @@ for target in target_columns:
 
 
     # --------------------------------------------------------
-    # R²
+    # R2
     # --------------------------------------------------------
 
     r2 = r2_score(
-        y_test[target],
+        actual_values,
         predictions
     )
 
@@ -395,23 +404,32 @@ for target in target_columns:
     # --------------------------------------------------------
     # ACCURACY WITHIN ±5 UNITS
     # --------------------------------------------------------
-
-    actual_values = (
-        y_test[target].values
-    )
-
+    #
+    # IMPORTANT:
+    #
+    # This is NOT ±5%.
+    #
+    # Example:
+    #
+    # Actual = 10
+    # Predicted = 14
+    #
+    # Absolute error = 4
+    #
+    # Since 4 <= 5,
+    # prediction is considered correct.
+    #
+    # --------------------------------------------------------
 
     absolute_error = np.abs(
         actual_values - predictions
     )
 
-
     correct_predictions = (
         absolute_error <= 5
     )
 
-
-    accuracy = (
+    accuracy_within_5 = (
         np.mean(
             correct_predictions
         ) * 100
@@ -423,6 +441,9 @@ for target in target_columns:
     # --------------------------------------------------------
 
     evaluation_results.append({
+
+        "Model":
+            "DRS XGBoost",
 
         "Target":
             target,
@@ -440,149 +461,154 @@ for target in target_columns:
             r2,
 
         "Accuracy_Within_5":
-            accuracy
+            accuracy_within_5
     })
 
 
-    # ========================================================
-    # PRINT TARGET RESULTS
-    # ========================================================
+    # --------------------------------------------------------
+    # PRINT RESULTS
+    # --------------------------------------------------------
 
-    print("\n--------------------------------------------")
+    print("\n" + "-" * 50)
     print(f"{target} RESULTS")
-    print("--------------------------------------------")
+    print("-" * 50)
 
     print(
-        f"MAE             : {mae:.4f}"
+        f"MAE                 : {mae:.4f}"
     )
 
     print(
-        f"MSE             : {mse:.4f}"
+        f"MSE                 : {mse:.4f}"
     )
 
     print(
-        f"RMSE            : {rmse:.4f}"
+        f"RMSE                : {rmse:.4f}"
     )
 
     print(
-        f"R²              : {r2:.4f}"
+        f"R²                  : {r2:.4f}"
     )
 
     print(
-        f"Accuracy ±5     : {accuracy:.2f}%"
+        f"Accuracy within ±5  : "
+        f"{accuracy_within_5:.2f}%"
     )
 
 
 # ============================================================
-# 12. FINAL RESULTS
+# 13. RESULTS DATAFRAME
 # ============================================================
-
-print("\n")
-print("============================================================")
-print("FINAL XGBOOST EVALUATION RESULTS")
-print("============================================================")
-
 
 evaluation_results_df = pd.DataFrame(
     evaluation_results
 )
 
 
-if not evaluation_results_df.empty:
+# ============================================================
+# 14. FINAL RESULTS
+# ============================================================
 
-    print(
-        evaluation_results_df.to_string(
-            index=False,
-            float_format=lambda x: f"{x:.4f}"
-        )
+print("\n\n" + "=" * 80)
+print("FINAL DRS XGBOOST EVALUATION RESULTS")
+print("=" * 80)
+
+print(
+    evaluation_results_df.to_string(
+        index=False,
+        float_format=lambda x: f"{x:.4f}"
     )
-
-else:
-
-    print(
-        "No model results available."
-    )
+)
 
 
 # ============================================================
-# 13. DETAILED FINAL SUMMARY
+# 15. OVERALL AVERAGES
 # ============================================================
 
-print("\n")
-print("============================================================")
-print("FINAL SUMMARY")
-print("============================================================")
+average_r2 = evaluation_results_df[
+    "R2"
+].mean()
 
+average_mae = evaluation_results_df[
+    "MAE"
+].mean()
 
-for _, row in evaluation_results_df.iterrows():
+average_mse = evaluation_results_df[
+    "MSE"
+].mean()
 
-    print(
-        f"\n{row['Target']}"
-    )
+average_rmse = evaluation_results_df[
+    "RMSE"
+].mean()
 
-    print(
-        "--------------------------------------------"
-    )
-
-    print(
-        f"R²          : "
-        f"{row['R2']:.4f}"
-    )
-
-    print(
-        f"MAE         : "
-        f"{row['MAE']:.4f}"
-    )
-
-    print(
-        f"MSE         : "
-        f"{row['MSE']:.4f}"
-    )
-
-    print(
-        f"RMSE        : "
-        f"{row['RMSE']:.4f}"
-    )
-
-    print(
-        f"Accuracy ±5 : "
-        f"{row['Accuracy_Within_5']:.2f}%"
-    )
+average_accuracy = evaluation_results_df[
+    "Accuracy_Within_5"
+].mean()
 
 
 # ============================================================
-# 14. COMPLETION
+# 16. OVERALL SUMMARY
 # ============================================================
 
-print("\n")
-print("============================================================")
-print("XGBOOST MODEL EVALUATION COMPLETED")
-print("============================================================")
+print("\n\n" + "=" * 80)
+print("OVERALL DRS XGBOOST PERFORMANCE")
+print("=" * 80)
+
+print(
+    f"Average R²                 : "
+    f"{average_r2:.4f}"
+)
+
+print(
+    f"Average MAE                : "
+    f"{average_mae:.4f}"
+)
+
+print(
+    f"Average MSE                : "
+    f"{average_mse:.4f}"
+)
+
+print(
+    f"Average RMSE               : "
+    f"{average_rmse:.4f}"
+)
+
+print(
+    f"Average Accuracy within ±5 : "
+    f"{average_accuracy:.2f}%"
+)
+
+
+# ============================================================
+# 17. SAVE EVALUATION RESULTS
+# ============================================================
+
+evaluation_results_df.to_csv(
+    RESULTS_PATH,
+    index=False
+)
+
+
+print("\nEvaluation results saved:")
+print(RESULTS_PATH)
+
+
+# ============================================================
+# 18. FINAL COMPLETION
+# ============================================================
+
+print("\n" + "=" * 80)
+print("DRS XGBOOST MODEL EVALUATION COMPLETED")
+print("=" * 80)
 
 print("\nModels evaluated:")
 
 for target in target_columns:
 
     print(
-        f"- {target}_best_model.pkl"
+        f"- {model_files[target]}"
     )
-
 
 print("\nMetrics calculated:")
 
-print("- R²")
-print("- MAE")
-print("- MSE")
-print("- RMSE")
-print("- Accuracy within ±5 units")
-
-
-print("\nNo CSV file was created.")
-
-print("No graphs were created.")
-
-print("No graph folder was created.")
-
-print("\n============================================================")
 print("EVALUATION COMPLETE")
-print("============================================================")
