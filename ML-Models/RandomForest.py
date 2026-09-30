@@ -1,10 +1,22 @@
+
+# ============================================================
+# RANDOM FOREST - DRUG SYNERGY PREDICTION
+# DRS-BASED MACHINE LEARNING MODEL
+# ============================================================
+
 import os
-import pandas as pd
 import numpy as np
+import pandas as pd
 import joblib
 
-from sklearn.model_selection import train_test_split, KFold, cross_val_score
+from sklearn.model_selection import (
+    train_test_split,
+    KFold,
+    cross_val_score
+)
+
 from sklearn.ensemble import RandomForestRegressor
+
 from sklearn.metrics import (
     mean_absolute_error,
     mean_squared_error,
@@ -23,7 +35,7 @@ BASE_DIR = os.path.dirname(
 DATA_PATH = os.path.join(
     BASE_DIR,
     "data",
-    "ml_ready_dataset_clean.csv"
+    "drs_ml_ready_dataset.csv"
 )
 
 MODEL_DIR = os.path.join(
@@ -40,152 +52,30 @@ os.makedirs(
 
 
 # ============================================================
-# 2. START
+# 2. SETTINGS
 # ============================================================
 
-print("============================================")
-print("DRUG SYNERGY PREDICTION")
-print("RANDOM FOREST MODEL TRAINING")
-print("5-FOLD CROSS-VALIDATION")
-print("============================================")
-
-
-# ============================================================
-# 3. LOAD DATASET
-# ============================================================
-
-print("\nLoading cleaned ML-ready dataset...")
-
-df = pd.read_csv(
-    DATA_PATH
-)
-
-print("Dataset loaded successfully!")
-print("Dataset shape:", df.shape)
-
-
-# ============================================================
-# 4. TARGET COLUMNS
-# ============================================================
-
-target_columns = [
+TARGET_COLUMNS = [
     "ZIP",
     "Bliss",
     "Loewe",
     "HSA"
 ]
 
-print("\nTarget columns:")
-print(target_columns)
+ACCURACY_TOLERANCE = 5
+
+RANDOM_STATE = 42
+
+TEST_SIZE = 0.20
+
+N_SPLITS = 5
 
 
 # ============================================================
-# 5. DATA CHECK
+# 3. RANDOM FOREST PARAMETER SEARCH
 # ============================================================
 
-print("\n============================================")
-print("DATA CHECK")
-print("============================================")
-
-print(
-    "Missing values:",
-    df.isnull().sum().sum()
-)
-
-print(
-    "Duplicate rows:",
-    df.duplicated().sum()
-)
-
-
-if df.isnull().sum().sum() > 0:
-
-    print(
-        "\nRemoving rows containing missing values..."
-    )
-
-    df = df.dropna()
-
-
-print(
-    "\nFinal dataset shape:",
-    df.shape
-)
-
-
-# ============================================================
-# 6. FEATURES AND TARGETS
-# ============================================================
-
-X = df.drop(
-    columns=target_columns
-)
-
-y = df[
-    target_columns
-]
-
-
-print("\n============================================")
-print("FEATURE INFORMATION")
-print("============================================")
-
-print(
-    "Number of samples:",
-    X.shape[0]
-)
-
-print(
-    "Number of features:",
-    X.shape[1]
-)
-
-print("\nFeatures:")
-print(X.columns.tolist())
-
-
-# ============================================================
-# 7. TRAIN-TEST SPLIT
-# ============================================================
-
-print("\n============================================")
-print("TRAIN-TEST SPLIT")
-print("============================================")
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.20,
-    random_state=42
-)
-
-print(
-    "Training samples:",
-    X_train.shape[0]
-)
-
-print(
-    "Testing samples :",
-    X_test.shape[0]
-)
-
-
-# ============================================================
-# 8. CROSS-VALIDATION
-# ============================================================
-
-cv = KFold(
-    n_splits=5,
-    shuffle=True,
-    random_state=42
-)
-
-
-# ============================================================
-# 9. RANDOM FOREST CONFIGURATIONS
-# ============================================================
-
-parameter_sets = [
+PARAMETER_SETS = [
 
     {
         "n_estimators": 200,
@@ -213,7 +103,23 @@ parameter_sets = [
 
     {
         "n_estimators": 300,
-        "max_depth": 20,
+        "max_depth": 30,
+        "min_samples_split": 2,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt"
+    },
+
+    {
+        "n_estimators": 300,
+        "max_depth": None,
+        "min_samples_split": 5,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt"
+    },
+
+    {
+        "n_estimators": 300,
+        "max_depth": None,
         "min_samples_split": 2,
         "min_samples_leaf": 2,
         "max_features": "sqrt"
@@ -224,65 +130,330 @@ parameter_sets = [
         "max_depth": None,
         "min_samples_split": 2,
         "min_samples_leaf": 1,
-        "max_features": 0.8
+        "max_features": "sqrt"
+    },
+
+    {
+        "n_estimators": 500,
+        "max_depth": 20,
+        "min_samples_split": 2,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt"
     }
 ]
 
 
 # ============================================================
-# 10. STORAGE
-# ============================================================
-
-cv_results = []
-
-selected_parameters = {}
-
-final_models = {}
-
-
-# ============================================================
-# 11. CROSS-VALIDATED MODEL SELECTION
+# 4. HEADER
 # ============================================================
 
 print("\n============================================")
+print("DRUG SYNERGY PREDICTION")
+print("RANDOM FOREST MODEL")
 print("5-FOLD CROSS-VALIDATION")
 print("============================================")
 
 
-for target in target_columns:
+# ============================================================
+# 5. LOAD DATASET
+# ============================================================
+
+print("\nLoading DRS ML-ready dataset...")
+
+df = pd.read_csv(
+    DATA_PATH
+)
+
+print("Dataset loaded successfully!")
+
+print(
+    "Dataset shape:",
+    df.shape
+)
+
+
+# ============================================================
+# 6. TARGET COLUMNS
+# ============================================================
+
+print("\nTarget columns:")
+
+print(
+    TARGET_COLUMNS
+)
+
+
+# ============================================================
+# 7. DATA CHECK
+# ============================================================
+
+print("\n============================================")
+print("DATA CHECK")
+print("============================================")
+
+
+missing_values = (
+    df.isnull().sum().sum()
+)
+
+duplicate_rows = (
+    df.duplicated().sum()
+)
+
+
+print(
+    "Missing values:",
+    missing_values
+)
+
+print(
+    "Duplicate rows:",
+    duplicate_rows
+)
+
+
+if missing_values > 0:
+
+    print(
+        "\nRemoving rows containing missing values..."
+    )
+
+    df = df.dropna()
+
+
+print(
+    "\nFinal dataset shape:",
+    df.shape
+)
+
+
+# ============================================================
+# 8. SELECT DRS FEATURES
+# ============================================================
+
+print("\n============================================")
+print("DRS FEATURE INFORMATION")
+print("============================================")
+
+
+drug1_features = [
+
+    column
+
+    for column in df.columns
+
+    if column.startswith(
+        "Drug1_DRS_PC"
+    )
+
+]
+
+
+drug2_features = [
+
+    column
+
+    for column in df.columns
+
+    if column.startswith(
+        "Drug2_DRS_PC"
+    )
+
+]
+
+
+feature_columns = (
+
+    drug1_features
+
+    +
+
+    drug2_features
+
+)
+
+
+if len(feature_columns) == 0:
+
+    raise ValueError(
+        "No DRS feature columns were found."
+    )
+
+
+print(
+    "Drug 1 DRS features:",
+    len(drug1_features)
+)
+
+print(
+    "Drug 2 DRS features:",
+    len(drug2_features)
+)
+
+print(
+    "Total DRS features:",
+    len(feature_columns)
+)
+
+
+print("\nFeatures:")
+
+print(
+    feature_columns
+)
+
+
+# ============================================================
+# 9. FEATURES AND TARGETS
+# ============================================================
+
+X = df[
+    feature_columns
+]
+
+y = df[
+    TARGET_COLUMNS
+]
+
+
+print(
+    "\nNumber of samples:",
+    X.shape[0]
+)
+
+print(
+    "Number of features:",
+    X.shape[1]
+)
+
+
+# ============================================================
+# 10. TRAIN-TEST SPLIT
+# ============================================================
+
+print("\n============================================")
+print("TRAIN-TEST SPLIT")
+print("============================================")
+
+
+X_train, X_test, y_train, y_test = train_test_split(
+
+    X,
+
+    y,
+
+    test_size=TEST_SIZE,
+
+    random_state=RANDOM_STATE
+
+)
+
+
+print(
+    "Training samples:",
+    X_train.shape[0]
+)
+
+print(
+    "Testing samples :",
+    X_test.shape[0]
+)
+
+
+# ============================================================
+# 11. 5-FOLD CROSS-VALIDATION
+# ============================================================
+
+cv = KFold(
+
+    n_splits=N_SPLITS,
+
+    shuffle=True,
+
+    random_state=RANDOM_STATE
+
+)
+
+
+# ============================================================
+# 12. RANDOM FOREST MODEL SELECTION
+# ============================================================
+
+print("\n============================================")
+print("RANDOM FOREST MODEL SELECTION")
+print("============================================")
+
+
+print(
+    "Testing",
+    len(PARAMETER_SETS),
+    "parameter configurations."
+)
+
+
+cv_results = []
+
+best_models = {}
+
+
+for target in TARGET_COLUMNS:
 
     print("\n============================================")
-    print(f"TARGET: {target}")
+
+    print(
+        "TARGET:",
+        target
+    )
+
     print("============================================")
 
-    best_cv_r2 = float("-inf")
-    best_params = None
+
+    best_cv_r2 = -np.inf
+
+    best_parameters = None
+
+    best_model = None
+
+
+    target_train = y_train[
+        target
+    ]
 
 
     for config_number, params in enumerate(
-        parameter_sets,
+
+        PARAMETER_SETS,
+
         start=1
+
     ):
 
-        print(
-            f"\nConfiguration "
-            f"{config_number}/{len(parameter_sets)}"
-        )
+
+        print("\n--------------------------------------------")
 
         print(
-            f"n_estimators={params['n_estimators']}, "
-            f"max_depth={params['max_depth']}, "
-            f"min_samples_split={params['min_samples_split']}, "
-            f"min_samples_leaf={params['min_samples_leaf']}, "
-            f"max_features={params['max_features']}"
+            "Configuration:",
+            config_number
+        )
+
+        print("--------------------------------------------")
+
+
+        print(
+            "Parameters:",
+            params
         )
 
 
         model = RandomForestRegressor(
 
-            n_estimators=params["n_estimators"],
+            n_estimators=params[
+                "n_estimators"
+            ],
 
-            max_depth=params["max_depth"],
+            max_depth=params[
+                "max_depth"
+            ],
 
             min_samples_split=params[
                 "min_samples_split"
@@ -296,15 +467,12 @@ for target in target_columns:
                 "max_features"
             ],
 
-            random_state=42,
+            random_state=RANDOM_STATE,
 
             n_jobs=-1
+
         )
 
-
-        # ----------------------------------------------------
-        # 5-FOLD CROSS-VALIDATION
-        # ----------------------------------------------------
 
         cv_scores = cross_val_score(
 
@@ -312,19 +480,25 @@ for target in target_columns:
 
             X_train,
 
-            y_train[target],
+            target_train,
 
             cv=cv,
 
             scoring="r2",
 
-            n_jobs=1
+            n_jobs=-1
+
         )
 
 
-        mean_cv_r2 = cv_scores.mean()
+        mean_cv_r2 = np.mean(
+            cv_scores
+        )
 
-        std_cv_r2 = cv_scores.std()
+
+        std_cv_r2 = np.std(
+            cv_scores
+        )
 
 
         print(
@@ -335,13 +509,15 @@ for target in target_columns:
             )
         )
 
+
         print(
             f"Mean CV R²: "
             f"{mean_cv_r2:.4f}"
         )
 
+
         print(
-            f"CV R² Std: "
+            f"CV R² Std : "
             f"{std_cv_r2:.4f}"
         )
 
@@ -354,83 +530,98 @@ for target in target_columns:
             "Configuration":
                 config_number,
 
-            "n_estimators":
-                params["n_estimators"],
+            "N_Estimators":
+                params[
+                    "n_estimators"
+                ],
 
-            "max_depth":
-                params["max_depth"],
+            "Max_Depth":
+                params[
+                    "max_depth"
+                ],
 
-            "min_samples_split":
-                params["min_samples_split"],
+            "Min_Samples_Split":
+                params[
+                    "min_samples_split"
+                ],
 
-            "min_samples_leaf":
-                params["min_samples_leaf"],
+            "Min_Samples_Leaf":
+                params[
+                    "min_samples_leaf"
+                ],
 
-            "max_features":
-                params["max_features"],
+            "Max_Features":
+                params[
+                    "max_features"
+                ],
 
             "Mean_CV_R2":
                 mean_cv_r2,
 
-            "Std_CV_R2":
+            "CV_R2_STD":
                 std_cv_r2
+
         })
 
 
-        # ----------------------------------------------------
-        # SELECT BEST CONFIGURATION
-        # ----------------------------------------------------
-
         if mean_cv_r2 > best_cv_r2:
 
-            best_cv_r2 = mean_cv_r2
+            best_cv_r2 = (
+                mean_cv_r2
+            )
 
-            best_params = params
+            best_parameters = params
 
-
-    # ========================================================
-    # BEST CONFIGURATION
-    # ========================================================
-
-    selected_parameters[target] = best_params
+            best_model = model
 
 
-    print("\nBEST CONFIGURATION")
-    print("--------------------------------------------")
+    # --------------------------------------------------------
+    # BEST MODEL
+    # --------------------------------------------------------
+
+    print("\n============================================")
 
     print(
-        f"Mean CV R²: "
+        "BEST RANDOM FOREST CONFIGURATION"
+    )
+
+    print("============================================")
+
+
+    print(
+        "Target:",
+        target
+    )
+
+
+    print(
+        "Best parameters:",
+        best_parameters
+    )
+
+
+    print(
+        f"Best Mean CV R²: "
         f"{best_cv_r2:.4f}"
     )
 
-    print(
-        f"n_estimators: "
-        f"{best_params['n_estimators']}"
-    )
 
-    print(
-        f"max_depth: "
-        f"{best_params['max_depth']}"
-    )
+    best_models[target] = {
 
-    print(
-        f"min_samples_split: "
-        f"{best_params['min_samples_split']}"
-    )
+        "model":
+            best_model,
 
-    print(
-        f"min_samples_leaf: "
-        f"{best_params['min_samples_leaf']}"
-    )
+        "parameters":
+            best_parameters,
 
-    print(
-        f"max_features: "
-        f"{best_params['max_features']}"
-    )
+        "mean_cv_r2":
+            best_cv_r2
+
+    }
 
 
 # ============================================================
-# 12. TRAIN FINAL MODELS
+# 13. TRAIN FINAL RANDOM FOREST MODELS
 # ============================================================
 
 print("\n============================================")
@@ -438,83 +629,118 @@ print("TRAINING FINAL RANDOM FOREST MODELS")
 print("============================================")
 
 
-final_results = []
+final_models = {}
 
 
-for target in target_columns:
+for target in TARGET_COLUMNS:
 
-    params = selected_parameters[target]
+    print(
+        "\nTraining final model for",
+        target,
+        "..."
+    )
+
+
+    model = best_models[target][
+        "model"
+    ]
+
+
+    model.fit(
+
+        X_train,
+
+        y_train[target]
+
+    )
+
+
+    final_models[target] = model
 
 
     print(
-        f"\nTraining final model for {target}..."
+        target,
+        "completed."
     )
 
 
-    model = RandomForestRegressor(
+# ============================================================
+# 14. FINAL TEST SET EVALUATION
+# ============================================================
 
-        n_estimators=params["n_estimators"],
-
-        max_depth=params["max_depth"],
-
-        min_samples_split=params[
-            "min_samples_split"
-        ],
-
-        min_samples_leaf=params[
-            "min_samples_leaf"
-        ],
-
-        max_features=params[
-            "max_features"
-        ],
-
-        random_state=42,
-
-        n_jobs=-1
-    )
+print("\n============================================")
+print("FINAL TEST SET EVALUATION")
+print("============================================")
 
 
-    # --------------------------------------------------------
-    # TRAIN
-    # --------------------------------------------------------
-
-    model.fit(
-        X_train,
-        y_train[target]
-    )
+results = []
 
 
-    # --------------------------------------------------------
-    # TEST PREDICTION
-    # --------------------------------------------------------
+all_predictions = {}
+
+
+for target in TARGET_COLUMNS:
+
+    model = final_models[
+        target
+    ]
+
 
     predictions = model.predict(
         X_test
     )
 
 
+    actual_values = (
+        y_test[target].values
+    )
+
+
     # --------------------------------------------------------
-    # METRICS
+    # MAE
     # --------------------------------------------------------
 
     mae = mean_absolute_error(
-        y_test[target],
+
+        actual_values,
+
         predictions
+
     )
 
+
+    # --------------------------------------------------------
+    # MSE
+    # --------------------------------------------------------
+
     mse = mean_squared_error(
-        y_test[target],
+
+        actual_values,
+
         predictions
+
     )
+
+
+    # --------------------------------------------------------
+    # RMSE
+    # --------------------------------------------------------
 
     rmse = np.sqrt(
         mse
     )
 
+
+    # --------------------------------------------------------
+    # R²
+    # --------------------------------------------------------
+
     r2 = r2_score(
-        y_test[target],
+
+        actual_values,
+
         predictions
+
     )
 
 
@@ -522,39 +748,81 @@ for target in target_columns:
     # ACCURACY WITHIN ±5
     # --------------------------------------------------------
 
+    absolute_errors = np.abs(
+
+        actual_values -
+
+        predictions
+
+    )
+
+
+    correct_predictions = (
+
+        absolute_errors
+
+        <=
+
+        ACCURACY_TOLERANCE
+
+    )
+
+
     accuracy = (
+
         np.mean(
-            np.abs(
-                y_test[target].values
-                - predictions
-            ) <= 5
+            correct_predictions
         )
-        * 100
+
+        *
+
+        100
+
     )
 
 
     # --------------------------------------------------------
-    # SAVE MODEL
+    # STORE PREDICTIONS
     # --------------------------------------------------------
 
-    final_models[target] = model
+    all_predictions[
+        target
+    ] = predictions
 
 
     # --------------------------------------------------------
     # STORE RESULTS
     # --------------------------------------------------------
 
-    final_results.append({
+    results.append({
 
         "Target":
             target,
 
         "Mean_CV_R2":
-            max(
-                result["Mean_CV_R2"]
-                for result in cv_results
-                if result["Target"] == target
-            ),
+            best_models[target][
+                "mean_cv_r2"
+            ],
+
+        "N_Estimators":
+            best_models[target][
+                "parameters"
+            ]["n_estimators"],
+
+        "Max_Depth":
+            best_models[target][
+                "parameters"
+            ]["max_depth"],
+
+        "Min_Samples_Split":
+            best_models[target][
+                "parameters"
+            ]["min_samples_split"],
+
+        "Min_Samples_Leaf":
+            best_models[target][
+                "parameters"
+            ]["min_samples_leaf"],
 
         "MAE":
             mae,
@@ -570,36 +838,283 @@ for target in target_columns:
 
         "Accuracy_Within_5":
             accuracy
+
     })
 
 
+    # ========================================================
+    # PRINT RESULTS
+    # ========================================================
+
+    print("\n--------------------------------------------")
+
     print(
-        f"{target} completed."
+        target
+    )
+
+    print("--------------------------------------------")
+
+
+    print(
+        f"Mean CV R² : "
+        f"{best_models[target]['mean_cv_r2']:.4f}"
+    )
+
+
+    print(
+        "Best parameters:",
+        best_models[target][
+            "parameters"
+        ]
+    )
+
+
+    print(
+        f"Test MAE   : "
+        f"{mae:.4f}"
+    )
+
+
+    print(
+        f"Test MSE   : "
+        f"{mse:.4f}"
+    )
+
+
+    print(
+        f"Test RMSE  : "
+        f"{rmse:.4f}"
+    )
+
+
+    print(
+        f"Test R²    : "
+        f"{r2:.4f}"
+    )
+
+
+    print(
+        f"Accuracy within ±5 : "
+        f"{accuracy:.2f}%"
     )
 
 
 # ============================================================
-# 13. FINAL RESULTS
+# 15. RESULTS DATAFRAME
 # ============================================================
 
-final_results_df = pd.DataFrame(
-    final_results
+results_df = pd.DataFrame(
+    results
 )
 
 
+# ============================================================
+# 16. FINAL RESULTS TABLE
+# ============================================================
+
 print("\n============================================")
-print("FINAL RANDOM FOREST RESULTS")
+print("FINAL RANDOM FOREST EVALUATION RESULTS")
 print("============================================")
 
+
+display_df = results_df.copy()
+
+
+display_df[
+    "Mean_CV_R2"
+] = display_df[
+    "Mean_CV_R2"
+].round(4)
+
+
+display_df[
+    "MAE"
+] = display_df[
+    "MAE"
+].round(4)
+
+
+display_df[
+    "MSE"
+] = display_df[
+    "MSE"
+].round(4)
+
+
+display_df[
+    "RMSE"
+] = display_df[
+    "RMSE"
+].round(4)
+
+
+display_df[
+    "R2"
+] = display_df[
+    "R2"
+].round(4)
+
+
+display_df[
+    "Accuracy_Within_5"
+] = display_df[
+    "Accuracy_Within_5"
+].round(2)
+
+
 print(
-    final_results_df.to_string(
+    display_df.to_string(
         index=False
     )
 )
 
 
 # ============================================================
-# 14. SAVE MODELS
+# 17. OVERALL ACCURACY
+# ============================================================
+
+print("\n============================================")
+print("OVERALL RANDOM FOREST PERFORMANCE")
+print("============================================")
+
+
+overall_accuracy = (
+
+    results_df[
+        "Accuracy_Within_5"
+    ]
+
+    .mean()
+
+)
+
+
+overall_r2 = (
+
+    results_df[
+        "R2"
+    ]
+
+    .mean()
+
+)
+
+
+overall_mae = (
+
+    results_df[
+        "MAE"
+    ]
+
+    .mean()
+
+)
+
+
+overall_rmse = (
+
+    results_df[
+        "RMSE"
+    ]
+
+    .mean()
+
+)
+
+
+print(
+    f"Overall Accuracy within ±5 : "
+    f"{overall_accuracy:.2f}%"
+)
+
+
+print(
+    f"Overall Mean R²             : "
+    f"{overall_r2:.4f}"
+)
+
+
+print(
+    f"Overall Mean MAE            : "
+    f"{overall_mae:.4f}"
+)
+
+
+print(
+    f"Overall Mean RMSE           : "
+    f"{overall_rmse:.4f}"
+)
+
+
+# ============================================================
+# 18. SAVE EVALUATION RESULTS
+# ============================================================
+
+results_path = os.path.join(
+
+    MODEL_DIR,
+
+    "randomforest_evaluation_results.csv"
+
+)
+
+
+results_df.to_csv(
+
+    results_path,
+
+    index=False
+
+)
+
+
+print(
+    "\nEvaluation results saved:"
+)
+
+print(
+    results_path
+)
+
+
+# ============================================================
+# 19. SAVE CROSS-VALIDATION RESULTS
+# ============================================================
+
+cv_results_df = pd.DataFrame(
+    cv_results
+)
+
+
+cv_results_path = os.path.join(
+
+    MODEL_DIR,
+
+    "randomforest_cv_results.csv"
+
+)
+
+
+cv_results_df.to_csv(
+
+    cv_results_path,
+
+    index=False
+
+)
+
+
+print(
+    "\nCross-validation results saved:"
+)
+
+print(
+    cv_results_path
+)
+
+
+# ============================================================
+# 20. SAVE RANDOM FOREST MODELS
 # ============================================================
 
 print("\n============================================")
@@ -607,17 +1122,25 @@ print("SAVING RANDOM FOREST MODELS")
 print("============================================")
 
 
-for target, model in final_models.items():
+for target in TARGET_COLUMNS:
 
     model_path = os.path.join(
+
         MODEL_DIR,
-        f"RF_{target}_best_model.pkl"
+
+        f"{target}_randomforest_model.pkl"
+
     )
 
+
     joblib.dump(
-        model,
+
+        final_models[target],
+
         model_path
+
     )
+
 
     print(
         f"{target} model saved:"
@@ -629,197 +1152,282 @@ for target, model in final_models.items():
 
 
 # ============================================================
-# 15. SAVE FEATURE COLUMNS
+# 21. SAVE BEST PARAMETERS
 # ============================================================
 
-feature_columns = X.columns.tolist()
+best_parameters = []
 
 
-feature_path = os.path.join(
-    MODEL_DIR,
-    "rf_feature_columns.pkl"
-)
+for target in TARGET_COLUMNS:
+
+    params = best_models[target][
+        "parameters"
+    ]
 
 
-joblib.dump(
-    feature_columns,
-    feature_path
-)
-
-
-print("\nFeature columns saved:")
-print(feature_path)
-
-
-# ============================================================
-# 16. SAVE CV RESULTS
-# ============================================================
-
-cv_results_df = pd.DataFrame(
-    cv_results
-)
-
-
-cv_results_path = os.path.join(
-    MODEL_DIR,
-    "random_forest_cv_results.csv"
-)
-
-
-cv_results_df.to_csv(
-    cv_results_path,
-    index=False
-)
-
-
-print("\nCross-validation results saved:")
-print(cv_results_path)
-
-
-# ============================================================
-# 17. SAVE FINAL RESULTS
-# ============================================================
-
-final_results_path = os.path.join(
-    MODEL_DIR,
-    "random_forest_results.csv"
-)
-
-
-final_results_df.to_csv(
-    final_results_path,
-    index=False
-)
-
-
-print("\nFinal Random Forest results saved:")
-print(final_results_path)
-
-
-# ============================================================
-# 18. SAVE SELECTED PARAMETERS
-# ============================================================
-
-parameter_rows = []
-
-
-for target, params in selected_parameters.items():
-
-    parameter_rows.append({
+    best_parameters.append({
 
         "Target":
             target,
 
-        "n_estimators":
-            params["n_estimators"],
+        "N_Estimators":
+            params[
+                "n_estimators"
+            ],
 
-        "max_depth":
-            params["max_depth"],
+        "Max_Depth":
+            params[
+                "max_depth"
+            ],
 
-        "min_samples_split":
-            params["min_samples_split"],
+        "Min_Samples_Split":
+            params[
+                "min_samples_split"
+            ],
 
-        "min_samples_leaf":
-            params["min_samples_leaf"],
+        "Min_Samples_Leaf":
+            params[
+                "min_samples_leaf"
+            ],
 
-        "max_features":
-            params["max_features"]
+        "Max_Features":
+            params[
+                "max_features"
+            ],
+
+        "Mean_CV_R2":
+            best_models[target][
+                "mean_cv_r2"
+            ]
+
     })
 
 
-parameter_df = pd.DataFrame(
-    parameter_rows
+best_parameters_df = pd.DataFrame(
+
+    best_parameters
+
 )
 
 
-parameter_path = os.path.join(
+parameters_path = os.path.join(
+
     MODEL_DIR,
-    "selected_random_forest_parameters.csv"
+
+    "randomforest_best_parameters.csv"
+
 )
 
 
-parameter_df.to_csv(
-    parameter_path,
+best_parameters_df.to_csv(
+
+    parameters_path,
+
     index=False
+
 )
 
 
-print("\nSelected parameters saved:")
-print(parameter_path)
+print(
+    "\nBest parameters saved:"
+)
+
+print(
+    parameters_path
+)
 
 
 # ============================================================
-# 19. FINAL SUMMARY
+# 22. SAVE TEST PREDICTIONS
+# ============================================================
+
+prediction_df = y_test.copy()
+
+
+for target in TARGET_COLUMNS:
+
+    prediction_df[
+        f"{target}_Predicted"
+    ] = all_predictions[
+        target
+    ]
+
+
+prediction_path = os.path.join(
+
+    MODEL_DIR,
+
+    "randomforest_test_predictions.csv"
+
+)
+
+
+prediction_df.to_csv(
+
+    prediction_path,
+
+    index=False
+
+)
+
+
+print(
+    "\nTest predictions saved:"
+)
+
+print(
+    prediction_path
+)
+
+
+# ============================================================
+# 23. FINAL SUMMARY
 # ============================================================
 
 print("\n============================================")
-print("RANDOM FOREST MODEL SUMMARY")
+print("FINAL RANDOM FOREST MODEL SUMMARY")
 print("============================================")
 
 
-for _, row in final_results_df.iterrows():
+for _, row in results_df.iterrows():
 
     print(
-        f"\n{row['Target']}"
+        "\n",
+        row["Target"]
     )
 
     print(
         "--------------------------------------------"
     )
 
+
     print(
         f"Mean CV R² : "
         f"{row['Mean_CV_R2']:.4f}"
     )
+
 
     print(
         f"Test MAE   : "
         f"{row['MAE']:.4f}"
     )
 
+
     print(
         f"Test MSE   : "
         f"{row['MSE']:.4f}"
     )
+
 
     print(
         f"Test RMSE  : "
         f"{row['RMSE']:.4f}"
     )
 
+
     print(
         f"Test R²    : "
         f"{row['R2']:.4f}"
     )
 
+
     print(
-        f"Accuracy ±5: "
+        f"Accuracy ±5 : "
         f"{row['Accuracy_Within_5']:.2f}%"
     )
 
 
-# ============================================================
-# 20. COMPLETION
-# ============================================================
+print("\n--------------------------------------------")
 
 
+print(
+    f"OVERALL ACCURACY ±5 : "
+    f"{overall_accuracy:.2f}%"
+)
+
+
+print(
+    f"OVERALL MEAN R²     : "
+    f"{overall_r2:.4f}"
+)
+
+
+print(
+    f"OVERALL MEAN MAE    : "
+    f"{overall_mae:.4f}"
+)
+
+
+print(
+    f"OVERALL MEAN RMSE   : "
+    f"{overall_rmse:.4f}"
+)
+
+
+print("--------------------------------------------")
+
+
+# ============================================================
+# 24. COMPLETION
+# ============================================================
+
+print("\n============================================")
 print("RANDOM FOREST TRAINING COMPLETED")
+print("============================================")
 
 
-print("\nModels created:")
+print("\nOutputs created:")
 
-for target in target_columns:
+print(
+    "- ZIP_randomforest_model.pkl"
+)
 
-    print(
-        f"- RF_{target}_best_model.pkl"
-    )
+print(
+    "- Bliss_randomforest_model.pkl"
+)
+
+print(
+    "- Loewe_randomforest_model.pkl"
+)
+
+print(
+    "- HSA_randomforest_model.pkl"
+)
+
+print(
+    "- randomforest_evaluation_results.csv"
+)
+
+print(
+    "- randomforest_cv_results.csv"
+)
+
+print(
+    "- randomforest_best_parameters.csv"
+)
+
+print(
+    "- randomforest_test_predictions.csv"
+)
+
 
 print("\nMetrics calculated:")
 
-print("- R²")
-print("- MAE")
-print("- MSE")
-print("- RMSE")
-print("- Accuracy within ±5 units")
+print("- Mean CV R²")
 
-p
+print("- MAE")
+
+print("- MSE")
+
+print("- RMSE")
+
+print("- Test R²")
+
+print("- Accuracy within ±5")
+
+print("- Overall Accuracy")
+
+
+print("\n============================================")
+print("DONE")
+print("============================================")
