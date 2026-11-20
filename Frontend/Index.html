@@ -1,1 +1,613 @@
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synergia | Drug Combination Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/app.css?v=20261120-pastel-dna">
+</head>
+<body>
+
+<!-- Animated DNA background -->
+<div class="dna-background" aria-hidden="true">
+    <div class="dna-orb orb-one"></div>
+    <div class="dna-orb orb-two"></div>
+    <div class="dna-orb orb-three"></div>
+
+    <svg class="dna-helix" viewBox="0 0 300 900" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="strandBlue" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#91b8ec"/>
+                <stop offset="100%" stop-color="#b5a7e8"/>
+            </linearGradient>
+            <linearGradient id="strandMint" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#a3d9d0"/>
+                <stop offset="100%" stop-color="#9eb9e7"/>
+            </linearGradient>
+        </defs>
+
+        <g class="dna-rungs">
+            <line x1="55" y1="20" x2="245" y2="20"/>
+            <line x1="105" y1="85" x2="195" y2="85"/>
+            <line x1="205" y1="150" x2="95" y2="150"/>
+            <line x1="245" y1="215" x2="55" y2="215"/>
+            <line x1="195" y1="280" x2="105" y2="280"/>
+            <line x1="95" y1="345" x2="205" y2="345"/>
+            <line x1="55" y1="410" x2="245" y2="410"/>
+            <line x1="105" y1="475" x2="195" y2="475"/>
+            <line x1="205" y1="540" x2="95" y2="540"/>
+            <line x1="245" y1="605" x2="55" y2="605"/>
+            <line x1="195" y1="670" x2="105" y2="670"/>
+            <line x1="95" y1="735" x2="205" y2="735"/>
+            <line x1="55" y1="800" x2="245" y2="800"/>
+        </g>
+
+        <path class="dna-strand strand-one"
+              stroke="url(#strandBlue)"
+              d="M55 20 C310 85 310 150 55 215
+                 C-200 280 -200 345 55 410
+                 C310 475 310 540 55 605
+                 C-200 670 -200 735 55 800"/>
+
+        <path class="dna-strand strand-two"
+              stroke="url(#strandMint)"
+              d="M245 20 C-10 85 -10 150 245 215
+                 C500 280 500 345 245 410
+                 C-10 475 -10 540 245 605
+                 C500 670 500 735 245 800"/>
+
+        <g class="dna-dots">
+            <circle cx="55" cy="20" r="7"/>
+            <circle cx="245" cy="20" r="7"/>
+            <circle cx="55" cy="215" r="7"/>
+            <circle cx="245" cy="215" r="7"/>
+            <circle cx="55" cy="410" r="7"/>
+            <circle cx="245" cy="410" r="7"/>
+            <circle cx="55" cy="605" r="7"/>
+            <circle cx="245" cy="605" r="7"/>
+            <circle cx="55" cy="800" r="7"/>
+            <circle cx="245" cy="800" r="7"/>
+        </g>
+    </svg>
+
+    <span class="dna-particle particle-a"></span>
+    <span class="dna-particle particle-b"></span>
+    <span class="dna-particle particle-c"></span>
+    <span class="dna-particle particle-d"></span>
+</div>
+
+<!-- Navigation -->
+<header class="topbar">
+    <a href="#home" class="brand" data-page="home">
+        <span class="brand-icon">✳</span>
+        <span>synergia<span class="brand-dot">.</span></span>
+    </a>
+
+    <button class="mobile-menu-button" id="mobile-menu-button" aria-label="Toggle navigation">
+        ☰
+    </button>
+
+    <nav class="main-nav" id="main-nav">
+        <a href="#home" class="nav-link active" data-page="home">Home</a>
+        <a href="#predict" class="nav-link" data-page="predict">Predict</a>
+        <a href="#datasets" class="nav-link" data-page="datasets">Datasets</a>
+        <a href="#methodology" class="nav-link" data-page="methodology">Methodology</a>
+        <a href="#model-lab" class="nav-link" data-page="model-lab">Model Lab</a>
+        <a href="#ai-guide" class="nav-link" data-page="ai-guide">AI Guide</a>
+        <a href="#history" class="nav-link" data-page="history">History</a>
+        <a href="#login" class="nav-link login-nav" data-page="login" id="login-nav">Login</a>
+        <button class="nav-link logout-nav hidden" id="logout-button">Logout</button>
+    </nav>
+</header>
+
+<main class="main-content">
+
+    <!-- HOME PAGE -->
+    <section class="page active" id="page-home">
+        <div class="hero">
+            <div class="hero-copy">
+                <div class="eyebrow"><span class="status-dot"></span> AI-POWERED DRUG DISCOVERY</div>
+                <h1>Discover the power of <span class="gradient-text">drug synergy.</span></h1>
+                <p class="hero-description">
+                    Explore how anticancer drugs work together. Predict drug-combination
+                    synergy using chemical structure, drug signatures and drug-resistance signatures.
+                </p>
+
+                <div class="hero-actions">
+                    <button class="button button-primary" data-go="predict">Start predicting <span>→</span></button>
+                    <button class="button button-secondary" data-go="methodology">Explore methodology</button>
+                </div>
+
+                <div class="hero-note">
+                    <span>✦</span> Research-focused machine learning platform
+                </div>
+            </div>
+
+            <div class="hero-art">
+                <div class="hero-art-circle circle-back"></div>
+                <div class="hero-art-circle circle-front"></div>
+                <div class="molecule molecule-one">N</div>
+                <div class="molecule molecule-two">O</div>
+                <div class="molecule molecule-three">H</div>
+                <div class="molecule molecule-four">C</div>
+                <div class="molecule-line line-one"></div>
+                <div class="molecule-line line-two"></div>
+                <div class="molecule-line line-three"></div>
+                <div class="hero-art-center">DNA<span>✧</span></div>
+                <div class="floating-label label-top">Drug signatures</div>
+                <div class="floating-label label-bottom">Precision prediction</div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <article class="stat-card">
+                <span class="stat-icon blue">⌘</span>
+                <div class="stat-value">03</div>
+                <div class="stat-label">Feature perspectives</div>
+                <small>Structure · DS · DRS</small>
+            </article>
+            <article class="stat-card">
+                <span class="stat-icon mint">◎</span>
+                <div class="stat-value">ML</div>
+                <div class="stat-label">Prediction engine</div>
+                <small>Machine learning models</small>
+            </article>
+            <article class="stat-card">
+                <span class="stat-icon lavender">⌁</span>
+                <div class="stat-value">05</div>
+                <div class="stat-label">Model approaches</div>
+                <small>Research model comparison</small>
+            </article>
+            <article class="stat-card">
+                <span class="stat-icon peach">✧</span>
+                <div class="stat-value">AI</div>
+                <div class="stat-label">Research assistant</div>
+                <small>Gemini-powered AI Guide</small>
+            </article>
+        </div>
+
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">EXPLORE SYNERGIA</span>
+                <h2>Your research workspace</h2>
+                <p>Everything you need to explore drug-combination predictions.</p>
+            </div>
+        </div>
+
+        <div class="quick-grid">
+            <button class="quick-card" data-go="predict">
+                <span class="quick-icon blue">⌕</span>
+                <strong>Predict synergy</strong>
+                <span>Test two drugs in a cancer cell line.</span>
+                <b>Open prediction →</b>
+            </button>
+            <button class="quick-card" data-go="datasets">
+                <span class="quick-icon mint">▤</span>
+                <strong>Explore datasets</strong>
+                <span>Understand the research datasets.</span>
+                <b>View datasets →</b>
+            </button>
+            <button class="quick-card" data-go="model-lab">
+                <span class="quick-icon lavender">▥</span>
+                <strong>Model laboratory</strong>
+                <span>Compare model evaluation results.</span>
+                <b>Explore models →</b>
+            </button>
+            <button class="quick-card" data-go="ai-guide">
+                <span class="quick-icon peach">✧</span>
+                <strong>Ask AI Guide</strong>
+                <span>Ask questions about the project.</span>
+                <b>Talk to AI →</b>
+            </button>
+        </div>
+    </section>
+
+    <!-- PREDICT PAGE -->
+    <section class="page" id="page-predict">
+        <div class="page-heading">
+            <span class="eyebrow">DRUG COMBINATION ANALYSIS</span>
+            <h1>Predict <span class="gradient-text">synergy.</span></h1>
+            <p>Choose two anticancer drugs and a cancer cell line to estimate their combination score.</p>
+        </div>
+
+        <div class="prediction-layout">
+            <div class="panel prediction-panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Prediction setup</h2>
+                        <p>Enter your combination details below.</p>
+                    </div>
+                    <span class="panel-icon">✧</span>
+                </div>
+
+                <form id="predict-form">
+                    <label for="drug-a">First drug</label>
+                    <select id="drug-a" required>
+                        <option value="">Loading drugs...</option>
+                    </select>
+
+                    <div class="combination-symbol">+</div>
+
+                    <label for="drug-b">Second drug</label>
+                    <select id="drug-b" required>
+                        <option value="">Select a second drug</option>
+                    </select>
+
+                    <label for="cell-line">Cancer cell line</label>
+                    <select id="cell-line" required>
+                        <option value="">Loading cell lines...</option>
+                    </select>
+
+                    <label for="feature-set">Feature representation</label>
+                    <select id="feature-set">
+                        <option value="auto">Automatic</option>
+                        <option value="structure">Chemical Structure</option>
+                        <option value="ds">Drug Signatures (DS)</option>
+                        <option value="drs">Drug Resistance Signatures (DRS)</option>
+                    </select>
+
+                    <label for="model-select">Prediction model</label>
+                    <select id="model-select">
+                        <option value="">Automatic / Default</option>
+                        <option value="lasso">LASSO</option>
+                        <option value="random_forest">Random Forest</option>
+                        <option value="adaboost">AdaBoost</option>
+                        <option value="xgboost">XGBoost</option>
+                        <option value="synergyx">SynergyX</option>
+                    </select>
+
+                    <button class="button button-primary button-full" type="submit" id="predict-button">
+                        <span>Run prediction</span><span>→</span>
+                    </button>
+                </form>
+                <p class="form-footnote">Predictions are computational estimates, not clinical recommendations.</p>
+            </div>
+
+            <div class="panel prediction-output">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Prediction result</h2>
+                        <p>Your analysis will appear here.</p>
+                    </div>
+                    <span class="result-status" id="result-status">Waiting</span>
+                </div>
+
+                <div id="prediction-result" class="result-placeholder">
+                    <div class="placeholder-icon">✧</div>
+                    <h3>Ready when you are</h3>
+                    <p>Select your drug combination and run a prediction to see the results.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DATASETS PAGE -->
+    <section class="page" id="page-datasets">
+        <div class="page-heading">
+            <span class="eyebrow">RESEARCH DATA FOUNDATION</span>
+            <h1>Our <span class="gradient-text">datasets.</span></h1>
+            <p>The data sources used to construct the drug-combination prediction pipeline.</p>
+        </div>
+
+        <div class="dataset-grid">
+            <article class="dataset-card">
+                <div class="dataset-top"><span class="dataset-icon blue">▤</span><span class="dataset-tag">Synergy data</span></div>
+                <h3>DrugComb</h3>
+                <p>Drug-combination response data used to obtain synergy measurements and train prediction models.</p>
+                <div class="dataset-meta">Role: Training target</div>
+            </article>
+
+            <article class="dataset-card">
+                <div class="dataset-top"><span class="dataset-icon lavender">⌬</span><span class="dataset-tag">Chemical data</span></div>
+                <h3>Drug Chemical Information</h3>
+                <p>Drug identifiers, chemical information and molecular structures for chemical feature generation.</p>
+                <div class="dataset-meta">Role: Structure features</div>
+            </article>
+
+            <article class="dataset-card">
+                <div class="dataset-top"><span class="dataset-icon mint">⌁</span><span class="dataset-tag">Transcriptomics</span></div>
+                <h3>LINCS L1000</h3>
+                <p>Drug-induced gene-expression signatures used to represent drug perturbation responses.</p>
+                <div class="dataset-meta">Role: DS features</div>
+            </article>
+
+            <article class="dataset-card">
+                <div class="dataset-top"><span class="dataset-icon peach">◎</span><span class="dataset-tag">Gene expression</span></div>
+                <h3>DepMap Expression</h3>
+                <p>Cell-line gene-expression profiles used to provide biological context for drug response.</p>
+                <div class="dataset-meta">Role: Expression context</div>
+            </article>
+
+            <article class="dataset-card">
+                <div class="dataset-top"><span class="dataset-icon blue">◈</span><span class="dataset-tag">Drug response</span></div>
+                <h3>GDSC</h3>
+                <p>Drug sensitivity and resistance information used to derive drug-resistance signatures.</p>
+                <div class="dataset-meta">Role: DRS features</div>
+            </article>
+
+            <article class="dataset-card">
+                <div class="dataset-top"><span class="dataset-icon lavender">⇄</span><span class="dataset-tag">External validation</span></div>
+                <h3>External Benchmarks</h3>
+                <p>ALMANAC, DrugCombDB, OncologyScreen and O'Neil datasets for external evaluation.</p>
+                <div class="dataset-meta">Role: External validation</div>
+            </article>
+        </div>
+    </section>
+
+    <!-- METHODOLOGY PAGE -->
+    <section class="page" id="page-methodology">
+        <div class="page-heading">
+            <span class="eyebrow">HOW IT WORKS</span>
+            <h1>Project <span class="gradient-text">methodology.</span></h1>
+            <p>Three biological and chemical perspectives are used to represent drug combinations.</p>
+        </div>
+
+        <div class="method-grid">
+            <article class="method-card">
+                <div class="method-number">01</div>
+                <span class="method-icon blue">⌬</span>
+                <h2>Chemical Structure</h2>
+                <p>Represents the chemical properties of drugs using molecular structures and numerical fingerprints.</p>
+                <ul>
+                    <li>SMILES representations</li>
+                    <li>RDKit molecular processing</li>
+                    <li>Morgan fingerprints</li>
+                    <li>1024-bit representation</li>
+                </ul>
+            </article>
+
+            <article class="method-card">
+                <div class="method-number">02</div>
+                <span class="method-icon lavender">⌁</span>
+                <h2>Drug Signatures (DS)</h2>
+                <p>Represents how drugs perturb gene expression and affect biological pathways.</p>
+                <ul>
+                    <li>LINCS L1000 data</li>
+                    <li>Drug perturbation signatures</li>
+                    <li>Gene-expression patterns</li>
+                    <li>Biological response features</li>
+                </ul>
+            </article>
+
+            <article class="method-card">
+                <div class="method-number">03</div>
+                <span class="method-icon mint">◎</span>
+                <h2>Drug Resistance Signatures (DRS)</h2>
+                <p>Represents gene-expression patterns associated with sensitivity and resistance to drugs.</p>
+                <ul>
+                    <li>GDSC drug response</li>
+                    <li>IC50-based sensitivity</li>
+                    <li>Resistance-associated expression</li>
+                    <li>Cell-line context</li>
+                </ul>
+            </article>
+        </div>
+
+        <div class="panel workflow-panel">
+            <span class="eyebrow">MODEL PIPELINE</span>
+            <h2>From raw data to prediction</h2>
+            <div class="workflow">
+                <div class="workflow-step"><span>01</span><strong>Data collection</strong><small>DrugComb, LINCS, GDSC, DepMap</small></div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step"><span>02</span><strong>Preprocessing</strong><small>Cleaning and matching</small></div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step"><span>03</span><strong>Feature engineering</strong><small>Structure, DS and DRS</small></div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step"><span>04</span><strong>Model training</strong><small>ML model comparison</small></div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step"><span>05</span><strong>Prediction</strong><small>Drug-combination S-score</small></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODEL LAB PAGE -->
+    <section class="page" id="page-model-lab">
+        <div class="page-heading">
+            <span class="eyebrow">PERFORMANCE & EVALUATION</span>
+            <h1>Model <span class="gradient-text">laboratory.</span></h1>
+            <p>Explore the evaluation results returned by your trained models.</p>
+        </div>
+
+        <div class="model-toolbar">
+            <div>
+                <h2>Model comparison</h2>
+                <p>Metrics loaded from your model comparison results.</p>
+            </div>
+            <button class="button button-secondary" id="refresh-results">↻ Refresh results</button>
+        </div>
+
+        <div class="panel table-panel">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature set</th>
+                            <th>Model</th>
+                            <th>RMSE</th>
+                            <th>MAE</th>
+                            <th>R²</th>
+                            <th>Spearman</th>
+                            <th>AUC</th>
+                            <th>Accuracy</th>
+                            <th>F1</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metrics-body">
+                        <tr><td colspan="9" class="empty-cell">Loading model metrics...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="table-status" id="metrics-updated">Waiting for metrics.</p>
+        </div>
+
+        <div class="panel graph-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Performance comparison graphs</h2>
+                    <p>Compare model performance using the available evaluation metrics.</p>
+                </div>
+                <select id="graph-metric" class="compact-select">
+                    <option value="r2">R² Score</option>
+                    <option value="rmse">RMSE</option>
+                    <option value="mae">MAE</option>
+                    <option value="spearman">Spearman</option>
+                    <option value="auc">AUC</option>
+                    <option value="accuracy">Accuracy</option>
+                    <option value="f1">F1 Score</option>
+                </select>
+            </div>
+            <div id="model-comparison-graphs" class="graph-area">
+                <p class="empty-cell">Load model metrics to display comparison graphs.</p>
+            </div>
+        </div>
+
+        <div class="panel feature-panel">
+            <h2>Feature-set comparison</h2>
+            <div id="feature-summary-content" class="feature-summary">
+                <div class="feature-summary-card"><strong>Structure</strong><span>Chemical representation</span></div>
+                <div class="feature-summary-card"><strong>DS</strong><span>Drug perturbation signatures</span></div>
+                <div class="feature-summary-card"><strong>DRS</strong><span>Drug resistance signatures</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI GUIDE PAGE -->
+    <section class="page" id="page-ai-guide">
+        <div class="page-heading">
+            <span class="eyebrow">YOUR RESEARCH ASSISTANT</span>
+            <h1>Meet your <span class="gradient-text">AI Guide.</span></h1>
+            <p>Ask questions about drug synergy, datasets, features, models and project methodology.</p>
+        </div>
+
+        <div class="panel chat-panel">
+            <div class="chat-header">
+                <div class="chat-avatar">✧</div>
+                <div>
+                    <h2>Synergia AI Guide</h2>
+                    <span><span class="status-dot"></span> Research assistant</span>
+                </div>
+            </div>
+
+            <div id="chat-messages" class="chat-messages">
+                <div class="chat-message assistant-message">
+                    <div class="message-avatar">✧</div>
+                    <div class="message-bubble">
+                        Hello! I'm your Synergia AI Guide. Ask me anything about the project, its datasets, machine-learning models or drug synergy.
+                    </div>
+                </div>
+            </div>
+
+            <div class="suggestion-list">
+                <button class="suggestion" data-question="Explain the difference between DS and DRS.">DS vs DRS</button>
+                <button class="suggestion" data-question="Explain the datasets used in this project.">Datasets</button>
+                <button class="suggestion" data-question="Explain how the prediction pipeline works.">Prediction pipeline</button>
+                <button class="suggestion" data-question="Explain the machine learning models.">ML models</button>
+            </div>
+
+            <form id="chat-form" class="chat-input-row">
+                <input id="chat-input" type="text" placeholder="Ask your research question..." autocomplete="off" required>
+                <button class="button button-primary" type="submit" id="chat-send">Send ↑</button>
+            </form>
+            <p class="ai-status" id="ai-status">AI Guide connection status will appear here.</p>
+        </div>
+    </section>
+
+    <!-- HISTORY PAGE -->
+    <section class="page" id="page-history">
+        <div class="page-heading">
+            <span class="eyebrow">YOUR RESEARCH ACTIVITY</span>
+            <h1>Prediction <span class="gradient-text">history.</span></h1>
+            <p>Review your previous drug-combination predictions.</p>
+        </div>
+
+        <div class="history-toolbar">
+            <input type="search" id="history-search" placeholder="Search drug or cell line...">
+            <button class="button button-secondary" id="refresh-history">↻ Refresh</button>
+        </div>
+
+        <div id="history-list" class="history-list">
+            <div class="panel empty-history">
+                <div class="placeholder-icon">◷</div>
+                <h3>Your history will appear here</h3>
+                <p>Sign in and run predictions to build your personal history.</p>
+                <button class="button button-primary" data-go="predict">Make a prediction</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- LOGIN PAGE -->
+    <section class="page" id="page-login">
+        <div class="auth-layout">
+            <div class="auth-intro">
+                <span class="eyebrow">WELCOME TO SYNERGIA</span>
+                <h1>Your research.<br><span class="gradient-text">One workspace.</span></h1>
+                <p>Sign in to access your prediction history and continue exploring drug-combination intelligence.</p>
+                <div class="auth-decoration">
+                    <span>✧</span>
+                    <span>⌬</span>
+                    <span>◎</span>
+                </div>
+            </div>
+
+            <div class="panel auth-panel">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-auth-mode="login">Login</button>
+                    <button class="auth-tab" data-auth-mode="register">Create account</button>
+                </div>
+
+                <h2 id="auth-title">Welcome back!</h2>
+                <p id="auth-description">Enter your details to sign in.</p>
+
+                <form id="auth-form">
+                    <label for="auth-email">Email address</label>
+                    <input id="auth-email" type="email" placeholder="you@example.com" required>
+
+                    <label for="auth-password">Password</label>
+                    <input id="auth-password" type="password" placeholder="Enter your password" required minlength="8">
+
+                    <button type="submit" class="button button-primary button-full" id="auth-submit">Sign in →</button>
+                </form>
+                <p id="auth-message" class="auth-message"></p>
+                <p class="auth-switch" id="auth-switch">New here? <button data-auth-mode="register">Create an account</button></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT PAGE -->
+    <section class="page" id="page-about">
+        <div class="page-heading">
+            <span class="eyebrow">ABOUT THE PROJECT</span>
+            <h1>About <span class="gradient-text">Synergia.</span></h1>
+            <p>A machine-learning research platform for anticancer drug-combination synergy prediction.</p>
+        </div>
+
+        <div class="panel about-panel">
+            <h2>Our objective</h2>
+            <p>
+                Synergia explores the prediction of synergistic effects between anticancer drug combinations
+                in cancer cell lines. It brings together chemical structure information, drug signatures
+                and drug-resistance signatures to study drug-combination responses.
+            </p>
+            <h2>Research disclaimer</h2>
+            <p>
+                Synergia is an academic research prototype. Its predictions are computational estimates
+                and must not be used as medical advice or as a substitute for clinical testing.
+            </p>
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <a href="#home" data-page="home" class="footer-brand">synergia<span>.</span></a>
+    <p>Drug Combination Intelligence · Academic Research Project</p>
+    <span>Made for scientific exploration ✧</span>
+</footer>
+
+<script src="/static/app.js?v=20261120-pastel-dna"></script>
+</body>
+</html>
