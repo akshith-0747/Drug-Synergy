@@ -1,0 +1,3 @@
+# Install PyTorch separately from the official selector if the optional attention model is needed.
+# https://pytorch.org/get-started/locally/
+torch>=2.3
