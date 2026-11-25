@@ -73,7 +73,14 @@ def main(max_rows: int = 50000):
         # Select columns explicitly: the source table's column order can vary.
         for drug_a, drug_b, cell_line, zip_score in frame[["Drug1", "Drug2", "Cell line", "ZIP"]].itertuples(index=False, name=None):
             try:
-                vector = pair_vector(drug_a, drug_b, cell_line, item["feature_set"], context)
+                vector = pair_vector(
+                    drug_a,
+                    drug_b,
+                    cell_line,
+                    item["feature_set"],
+                    context,
+                    pair_schema=bundle.get("pair_schema", "concat_v1"),
+                )
             except (ValueError, AttributeError):
                 continue
             vectors.append(vector)
