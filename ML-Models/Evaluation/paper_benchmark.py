@@ -12,7 +12,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from ML.feature_engineering.features import DATA_DIR, ML_DIR, _load_drug_maps, _make_fingerprints
+from ML.feature_engineering.features import (
+    DATA_DIR,
+    ML_DIR,
+    PAIR_SCHEMA_CONCAT,
+    PAIR_SCHEMA_SYMMETRIC_SUM_ABSDIFF,
+    _load_drug_maps,
+    _make_fingerprints,
+)
 from ML.models.native_fallback import auc_score
 from ML.prediction.predict import available_models
 from ML.storage import load
@@ -101,7 +108,8 @@ def _load_pair_features(smiles_values: set[str], context: dict):
 
 
 def _vectors(frame: pd.DataFrame, feature_set: str, context: dict,
-             structure_vectors: dict, signature_drugs: dict):
+             structure_vectors: dict, signature_drugs: dict,
+             pair_schema: str = PAIR_SCHEMA_CONCAT):
     drug_store = {
         "ds": context["drug_signatures"],
         "drs": context["resistance_signatures"],
@@ -137,8 +145,13 @@ def _vectors(frame: pd.DataFrame, feature_set: str, context: dict,
         # tables identify compounds by SMILES rather than the training aliases.
         left_parts, right_parts = [], []
         for a, b in pairs:
-            left_parts.extend((a, b, cell))
-            right_parts.extend((b, a, cell))
+            if view == "structure" and pair_schema == PAIR_SCHEMA_SYMMETRIC_SUM_ABSDIFF:
+                symmetric_parts = (a + b, np.abs(a - b), cell)
+                left_parts.extend(symmetric_parts)
+                right_parts.extend(symmetric_parts)
+            else:
+                left_parts.extend((a, b, cell))
+                right_parts.extend((b, a, cell))
         left.append(np.concatenate(left_parts).astype(np.float32, copy=False))
         right.append(np.concatenate(right_parts).astype(np.float32, copy=False))
         targets.append(float(target))
@@ -202,49 +215,36 @@ def run() -> tuple[pd.DataFrame, pd.DataFrame]:
 
     for dataset, frame in inputs.items():
         for feature_set in requested_feature_sets:
-            left, right, target, skipped_drug, skipped_cell = _vectors(
-                frame, feature_set, context, structure_vectors, signature_drugs
-            )
-            base_coverage = {
-                "dataset": dataset, "source_file": DATASETS[dataset],
-                "source_rows": int(len(frame)), "feature_set": feature_set,
-                "usable_rows": int(len(target)), "rows_skipped_missing_drug_feature": skipped_drug,
-                "rows_skipped_missing_cell_expression": skipped_cell,
-                "score_harmonization": "Released score units are not verified as DrugComb S-score; do not compare metrics across sources.",
-                "feature_matching": "canonical SMILES crosswalk to local chemical records for DS/DRS, exact fingerprint fallback; direct fingerprint from released SMILES for structure",
-            }
-            coverage_rows.append(base_coverage)
-            if not len(target):
-                continue
-            for (saved_feature_set, model_name), bundle in model_bundles.items():
-                if saved_feature_set != feature_set:
-                    continue
-                prediction = _predict_symmetry_averaged(bundle["model"], left, right)
-                scores = _metrics(target, prediction)
-                metric_rows.append({
+            candidates = [
+                (model_name, bundle)
+                for (saved_feature_set, model_name), bundle in model_bundles.items()
+                if saved_feature_set == feature_set
+            ]
+            schemas = sorted({
+                bundle.get("pair_schema", PAIR_SCHEMA_CONCAT)
+                for _, bundle in candidates
+            })
+            for pair_schema in schemas:
+                left, right, target, skipped_drug, skipped_cell = _vectors(
+                    frame,
+                    feature_set,
+                    context,
+                    structure_vectors,
+                    signature_drugs,
+                    pair_schema=pair_schema,
+                )
+                base_coverage = {
                     "dataset": dataset, "source_file": DATASETS[dataset],
-                    "feature_set": feature_set, "model": model_name,
-                    "implementation": bundle.get("implementation", "unknown"),
-                    "rows_evaluated": int(len(target)),
-                    "score_positive_rate_ge_10": float(np.mean(target >= 10)),
-                    **scores,
-                    "prediction_order": "average of both drug orders",
-                    "warning": "Author-linked LINCS/PRISM subset; released score units are not verified/harmonized to DrugComb S-score. Treat metrics, especially S>=10 classification, as exploratory and compare only within a source. Row counts are below full dataset counts in the paper.",
-                })
-
-    result = pd.DataFrame(metric_rows)
-    coverage = pd.DataFrame(coverage_rows)
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    result_path = RESULTS_DIR / "paper_external_validation.csv"
-    coverage_path = RESULTS_DIR / "paper_external_coverage.csv"
-    result.to_csv(result_path, index=False)
-    coverage.to_csv(coverage_path, index=False)
-    print("Saved external metrics:", result_path)
-    print("Saved feature coverage:", coverage_path)
-    print(coverage.to_string(index=False))
-    return result, coverage
-
-
-if __name__ == "__main__":
-    run()
-
+                    "source_rows": int(len(frame)), "feature_set": feature_set,
+                    "pair_schema": pair_schema,
+                    "usable_rows": int(len(target)), "rows_skipped_missing_drug_feature": skipped_drug,
+                    "rows_skipped_missing_cell_expression": skipped_cell,
+                    "score_harmonization": "Released score units are not verified as DrugComb S-score; do not compare metrics across sources.",
+                    "feature_matching": "canonical SMILES crosswalk to local chemical records for DS/DRS, exact fingerprint fallback; direct fingerprint from released SMILES for structure",
+                }
+                coverage_rows.append(base_coverage)
+                if not len(target):
+                    continue
+                for model_name, bundle in candidates:
+                    if bundle.get("pair_schema", PAIR_SCHEMA_CONCAT) != pair_schema:
+                        continue
