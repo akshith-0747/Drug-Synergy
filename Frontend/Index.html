@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,71 +7,16 @@
     <title>Synergia | Drug Combination Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/app.css?v=20261120-pastel-dna">
+    <link rel="stylesheet" href="/static/app.css?v=20261125-model-metrics-1">
 </head>
 <body>
 
-<!-- Animated DNA background -->
+<!-- 3D animated DNA background -->
 <div class="dna-background" aria-hidden="true">
     <div class="dna-orb orb-one"></div>
     <div class="dna-orb orb-two"></div>
     <div class="dna-orb orb-three"></div>
-
-    <svg class="dna-helix" viewBox="0 0 300 900" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-            <linearGradient id="strandBlue" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#91b8ec"/>
-                <stop offset="100%" stop-color="#b5a7e8"/>
-            </linearGradient>
-            <linearGradient id="strandMint" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#a3d9d0"/>
-                <stop offset="100%" stop-color="#9eb9e7"/>
-            </linearGradient>
-        </defs>
-
-        <g class="dna-rungs">
-            <line x1="55" y1="20" x2="245" y2="20"/>
-            <line x1="105" y1="85" x2="195" y2="85"/>
-            <line x1="205" y1="150" x2="95" y2="150"/>
-            <line x1="245" y1="215" x2="55" y2="215"/>
-            <line x1="195" y1="280" x2="105" y2="280"/>
-            <line x1="95" y1="345" x2="205" y2="345"/>
-            <line x1="55" y1="410" x2="245" y2="410"/>
-            <line x1="105" y1="475" x2="195" y2="475"/>
-            <line x1="205" y1="540" x2="95" y2="540"/>
-            <line x1="245" y1="605" x2="55" y2="605"/>
-            <line x1="195" y1="670" x2="105" y2="670"/>
-            <line x1="95" y1="735" x2="205" y2="735"/>
-            <line x1="55" y1="800" x2="245" y2="800"/>
-        </g>
-
-        <path class="dna-strand strand-one"
-              stroke="url(#strandBlue)"
-              d="M55 20 C310 85 310 150 55 215
-                 C-200 280 -200 345 55 410
-                 C310 475 310 540 55 605
-                 C-200 670 -200 735 55 800"/>
-
-        <path class="dna-strand strand-two"
-              stroke="url(#strandMint)"
-              d="M245 20 C-10 85 -10 150 245 215
-                 C500 280 500 345 245 410
-                 C-10 475 -10 540 245 605
-                 C500 670 500 735 245 800"/>
-
-        <g class="dna-dots">
-            <circle cx="55" cy="20" r="7"/>
-            <circle cx="245" cy="20" r="7"/>
-            <circle cx="55" cy="215" r="7"/>
-            <circle cx="245" cy="215" r="7"/>
-            <circle cx="55" cy="410" r="7"/>
-            <circle cx="245" cy="410" r="7"/>
-            <circle cx="55" cy="605" r="7"/>
-            <circle cx="245" cy="605" r="7"/>
-            <circle cx="55" cy="800" r="7"/>
-            <circle cx="245" cy="800" r="7"/>
-        </g>
-    </svg>
+    <div class="dna-helix-3d" id="dna-helix" aria-hidden="true"></div>
 
     <span class="dna-particle particle-a"></span>
     <span class="dna-particle particle-b"></span>
@@ -99,9 +43,17 @@
         <a href="#model-lab" class="nav-link" data-page="model-lab">Model Lab</a>
         <a href="#ai-guide" class="nav-link" data-page="ai-guide">AI Guide</a>
         <a href="#history" class="nav-link" data-page="history">History</a>
-        <a href="#login" class="nav-link login-nav" data-page="login" id="login-nav">Login</a>
-        <button class="nav-link logout-nav hidden" id="logout-button">Logout</button>
+        <a href="#review" class="nav-link" data-page="review">Review</a>
     </nav>
+    <div class="sidebar-account">
+        <div class="account-meter-icon" aria-hidden="true">✦</div>
+        <div class="account-meter-copy">
+            <strong id="account-summary">Free predictions</strong>
+            <span id="free-counter">Checking your allowance…</span>
+        </div>
+        <button class="button button-primary account-action" id="auth-open" type="button">Log in / Sign up</button>
+        <button class="button button-secondary account-action hidden" id="auth-logout" type="button">Log out</button>
+    </div>
 </header>
 
 <main class="main-content">
@@ -127,19 +79,11 @@
                 </div>
             </div>
 
-            <div class="hero-art">
-                <div class="hero-art-circle circle-back"></div>
-                <div class="hero-art-circle circle-front"></div>
-                <div class="molecule molecule-one">N</div>
-                <div class="molecule molecule-two">O</div>
-                <div class="molecule molecule-three">H</div>
-                <div class="molecule molecule-four">C</div>
-                <div class="molecule-line line-one"></div>
-                <div class="molecule-line line-two"></div>
-                <div class="molecule-line line-three"></div>
-                <div class="hero-art-center">DNA<span>✧</span></div>
+            <div class="hero-art" id="hero-visual" aria-label="Illustration of medicine capsules and molecular bubbles">
+                <div class="hero-visual-glow"></div>
+                <img class="hero-visual-image" src="/static/synergy-visual.svg" alt="Teal and white capsules floating among molecular structures">
                 <div class="floating-label label-top">Drug signatures</div>
-                <div class="floating-label label-bottom">Precision prediction</div>
+                <div class="floating-label label-bottom">Research predictions</div>
             </div>
         </div>
 
@@ -178,31 +122,68 @@
             </div>
         </div>
 
-        <div class="quick-grid">
-            <button class="quick-card" data-go="predict">
-                <span class="quick-icon blue">⌕</span>
-                <strong>Predict synergy</strong>
-                <span>Test two drugs in a cancer cell line.</span>
-                <b>Open prediction →</b>
-            </button>
-            <button class="quick-card" data-go="datasets">
-                <span class="quick-icon mint">▤</span>
-                <strong>Explore datasets</strong>
-                <span>Understand the research datasets.</span>
-                <b>View datasets →</b>
-            </button>
-            <button class="quick-card" data-go="model-lab">
-                <span class="quick-icon lavender">▥</span>
-                <strong>Model laboratory</strong>
-                <span>Compare model evaluation results.</span>
-                <b>Explore models →</b>
-            </button>
-            <button class="quick-card" data-go="ai-guide">
-                <span class="quick-icon peach">✧</span>
-                <strong>Ask AI Guide</strong>
-                <span>Ask questions about the project.</span>
-                <b>Talk to AI →</b>
-            </button>
+        <div class="home-workspace-grid">
+            <div class="quick-grid">
+                <button class="quick-card" data-go="predict">
+                    <span class="quick-icon blue">⌕</span>
+                    <strong>Predict synergy</strong>
+                    <span>Test two drugs in a cancer cell line.</span>
+                    <b>Open prediction →</b>
+                </button>
+                <button class="quick-card" data-go="datasets">
+                    <span class="quick-icon mint">▤</span>
+                    <strong>Explore datasets</strong>
+                    <span>Understand the research datasets.</span>
+                    <b>View datasets →</b>
+                </button>
+                <button class="quick-card" data-go="model-lab">
+                    <span class="quick-icon lavender">▥</span>
+                    <strong>Model laboratory</strong>
+                    <span>Compare model evaluation results.</span>
+                    <b>Explore models →</b>
+                </button>
+                <button class="quick-card" data-go="ai-guide">
+                    <span class="quick-icon peach">✧</span>
+                    <strong>Ask AI Guide</strong>
+                    <span>Ask questions about the project.</span>
+                    <b>Talk to AI →</b>
+                </button>
+            </div>
+
+            <aside class="home-enhancements" aria-labelledby="home-enhancements-title">
+                <div class="enhancements-header">
+                    <span class="enhancements-mark" aria-hidden="true">✦</span>
+                    <div>
+                        <span class="eyebrow">PROJECT ENHANCEMENTS</span>
+                        <h2 id="home-enhancements-title">A broader research workflow</h2>
+                    </div>
+                </div>
+                <div class="enhancements-dataset-stat">
+                    <strong>426,956</strong>
+                    <span>prepared DrugComb v1.5 rows</span>
+                    <small>19 columns · 172 cell lines</small>
+                </div>
+                <div class="enhancements-list">
+                    <article class="enhancement-item">
+                        <span class="enhancement-number">01</span>
+                        <div><strong>Three feature views</strong><small>Structure · DS · DRS</small></div>
+                    </article>
+                    <article class="enhancement-item">
+                        <span class="enhancement-number">02</span>
+                        <div><strong>Five model families</strong><small>Compared across the feature views</small></div>
+                    </article>
+                    <article class="enhancement-item">
+                        <span class="enhancement-number">03</span>
+                        <div><strong>Drug-pair holdout checks</strong><small>Validation splits keep each pair together</small></div>
+                    </article>
+                    <article class="enhancement-item">
+                        <span class="enhancement-number">04</span>
+                        <div><strong>Promising selected-pair outputs</strong><small>Some predictions may outperform base-paper examples; a matched test is needed to confirm.</small></div>
+                    </article>
+                </div>
+                <p class="enhancements-caveat">Prediction scores are estimates. Confirm accuracy using the same held-out drug pairs and scoring method before claiming an overall improvement.</p>
+                <button class="button button-secondary enhancements-link" type="button" data-go="model-lab">See model comparisons</button>
+            </aside>
         </div>
     </section>
 
@@ -226,39 +207,31 @@
 
                 <form id="predict-form">
                     <label for="drug-a">First drug</label>
-                    <select id="drug-a" required>
-                        <option value="">Loading drugs...</option>
-                    </select>
+                    <input id="drug-a" name="drug_a" list="drug-options" type="text" required
+                        placeholder="Type a drug name or choose a suggestion" autocomplete="off">
 
                     <div class="combination-symbol">+</div>
 
                     <label for="drug-b">Second drug</label>
-                    <select id="drug-b" required>
-                        <option value="">Select a second drug</option>
-                    </select>
+                    <input id="drug-b" name="drug_b" list="drug-options" type="text" required
+                        placeholder="Type a drug name or choose a suggestion" autocomplete="off">
+                    <datalist id="drug-options"></datalist>
 
                     <label for="cell-line">Cancer cell line</label>
-                    <select id="cell-line" required>
-                        <option value="">Loading cell lines...</option>
-                    </select>
+                    <input id="cell-line" name="cell_line" list="cell-line-options" type="text" required
+                        placeholder="Type a cell line or choose a suggestion" autocomplete="off">
+                    <datalist id="cell-line-options"></datalist>
 
-                    <label for="feature-set">Feature representation</label>
+                    <label for="feature-set">Feature-view comparison</label>
                     <select id="feature-set">
-                        <option value="auto">Automatic</option>
-                        <option value="structure">Chemical Structure</option>
-                        <option value="ds">Drug Signatures (DS)</option>
-                        <option value="drs">Drug Resistance Signatures (DRS)</option>
+                        <option value="auto" selected>Compare Structure, DS, and DRS</option>
                     </select>
 
-                    <label for="model-select">Prediction model</label>
+                    <label for="model-select">Model selection</label>
                     <select id="model-select">
-                        <option value="">Automatic / Default</option>
-                        <option value="lasso">LASSO</option>
-                        <option value="random_forest">Random Forest</option>
-                        <option value="adaboost">AdaBoost</option>
-                        <option value="xgboost">XGBoost</option>
-                        <option value="synergyx">SynergyX</option>
+                        <option value="auto" selected>Automatic · best validated model per view</option>
                     </select>
+                    <p class="form-footnote model-selection-note">Each view uses its lowest-error eligible model from pair-held-out validation. Results show the best-validated prediction and flag the largest S-score separately.</p>
 
                     <button class="button button-primary button-full" type="submit" id="predict-button">
                         <span>Run prediction</span><span>→</span>
@@ -296,9 +269,9 @@
         <div class="dataset-grid">
             <article class="dataset-card">
                 <div class="dataset-top"><span class="dataset-icon blue">▤</span><span class="dataset-tag">Synergy data</span></div>
-                <h3>DrugComb</h3>
-                <p>Drug-combination response data used to obtain synergy measurements and train prediction models.</p>
-                <div class="dataset-meta">Role: Training target</div>
+                <h3>DrugComb v1.5</h3>
+                <p>The active training table uses the S_sum synergy target and matched molecular and cell-line features.</p>
+                <div class="dataset-meta">426,956 rows · 19 columns · 172 cell lines</div>
             </article>
 
             <article class="dataset-card">
@@ -325,8 +298,8 @@
             <article class="dataset-card">
                 <div class="dataset-top"><span class="dataset-icon blue">◈</span><span class="dataset-tag">Drug response</span></div>
                 <h3>GDSC</h3>
-                <p>Drug sensitivity and resistance information used to derive drug-resistance signatures.</p>
-                <div class="dataset-meta">Role: DRS features</div>
+                <p>Fitted monotherapy response values are converted into resistance signatures for cell-line-aware predictions.</p>
+                <div class="dataset-meta">Role: Active DRS features</div>
             </article>
 
             <article class="dataset-card">
@@ -380,7 +353,9 @@
                 <p>Represents gene-expression patterns associated with sensitivity and resistance to drugs.</p>
                 <ul>
                     <li>GDSC drug response</li>
+                    <li>GDSC monotherapy response features</li>
                     <li>IC50-based sensitivity</li>
+                    <li>Quality-filtered dose-response curves</li>
                     <li>Resistance-associated expression</li>
                     <li>Cell-line context</li>
                 </ul>
@@ -415,29 +390,50 @@
         <div class="model-toolbar">
             <div>
                 <h2>Model comparison</h2>
-                <p>Metrics loaded from your model comparison results.</p>
+                <p>Compare model families and the validated DRS coverage upgrade. Each dataset label identifies its target and validation slice.</p>
             </div>
-            <button class="button button-secondary" id="refresh-results">↻ Refresh results</button>
+            <div class="model-actions">
+                <button class="button button-secondary" id="refresh-results">↻ Refresh results</button>
+                <button class="button button-primary" id="start-quick-evaluation">Run quick comparison</button>
+            </div>
+        </div>
+
+        <p class="table-status training-status" id="training-status" role="status" aria-live="polite">
+            Quick comparisons run separately from the deployed prediction models.
+        </p>
+
+        <div id="feature-summary-content" class="feature-summary model-highlights" aria-live="polite">
+            <div class="feature-summary-card"><strong>Loading comparison</strong><span>Best model by feature view will appear here.</span></div>
         </div>
 
         <div class="panel table-panel">
+            <div class="metrics-heading">
+                <div>
+                    <h2>Cross-validation scoreboard</h2>
+                    <p>Scores are fold means. Each row reports its own fold and usable-row counts.</p>
+                </div>
+                <span class="metrics-count" id="metrics-count">—</span>
+            </div>
             <div class="table-scroll">
                 <table>
                     <thead>
                         <tr>
-                            <th>Feature set</th>
+                            <th>Dataset</th>
+                            <th>Feature view</th>
                             <th>Model</th>
-                            <th>RMSE</th>
-                            <th>MAE</th>
+                            <th>MSE ↓</th>
+                            <th>RMSE ↓</th>
+                            <th>RMSE · 3σ ↓</th>
                             <th>R²</th>
                             <th>Spearman</th>
-                            <th>AUC</th>
-                            <th>Accuracy</th>
-                            <th>F1</th>
+                            <th>AUC · S ≥ 10</th>
+                            <th>Balanced accuracy</th>
+                            <th>F1 · S ≥ 10</th>
+                            <th>Folds · rows</th>
                         </tr>
                     </thead>
                     <tbody id="metrics-body">
-                        <tr><td colspan="9" class="empty-cell">Loading model metrics...</td></tr>
+                        <tr><td colspan="12" class="empty-cell">Loading model metrics...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -445,34 +441,52 @@
         </div>
 
         <div class="panel graph-panel">
-            <div class="panel-heading">
+            <div class="panel-heading graph-heading">
                 <div>
-                    <h2>Performance comparison graphs</h2>
-                    <p>Compare model performance using the available evaluation metrics.</p>
+                    <h2>Performance comparison</h2>
+                    <p>Compare LASSO, Random Forest, AdaBoost, XGBoost, and SynergyX across RMSE, MSE, and R².</p>
                 </div>
-                <select id="graph-metric" class="compact-select">
-                    <option value="r2">R² Score</option>
-                    <option value="rmse">RMSE</option>
-                    <option value="mae">MAE</option>
-                    <option value="spearman">Spearman</option>
-                    <option value="auc">AUC</option>
-                    <option value="accuracy">Accuracy</option>
-                    <option value="f1">F1 Score</option>
-                </select>
+                <div class="graph-controls">
+                    <label>Dataset
+                        <select id="graph-dataset" class="compact-select">
+                            <option value="all">All datasets</option>
+                        </select>
+                    </label>
+                    <label>Feature view
+                        <select id="graph-feature" class="compact-select">
+                            <option value="all">All views</option>
+                            <option value="structure">Structure</option>
+                            <option value="ds">DS</option>
+                            <option value="drs">DRS</option>
+                        </select>
+                    </label>
+                </div>
             </div>
             <div id="model-comparison-graphs" class="graph-area">
-                <p class="empty-cell">Load model metrics to display comparison graphs.</p>
+                <p class="empty-cell">Load model metrics to display RMSE, MSE, and R² comparisons.</p>
             </div>
+            <p class="comparison-caveat">The displayed comparisons use the v1.5 S_sum target. Rows and folds are reported separately for each feature view; the pair-grouped split keeps each drug pair out of both training and validation. MSE was not recorded for the saved DS and DRS evaluations, so those entries are marked unavailable instead of estimated.</p>
         </div>
 
-        <div class="panel feature-panel">
-            <h2>Feature-set comparison</h2>
-            <div id="feature-summary-content" class="feature-summary">
-                <div class="feature-summary-card"><strong>Structure</strong><span>Chemical representation</span></div>
-                <div class="feature-summary-card"><strong>DS</strong><span>Drug perturbation signatures</span></div>
-                <div class="feature-summary-card"><strong>DRS</strong><span>Drug resistance signatures</span></div>
+        <section class="panel current-evaluation" aria-labelledby="current-evaluation-title">
+            <span class="eyebrow">FULL-DATA PREDICTION PROFILE</span>
+            <h2 id="current-evaluation-title">Expanded v1.5 feature coverage</h2>
+            <p>The active dataset contains 426,956 rows and 172 cell lines across 19 columns. Production XGBoost bundles are retained, while automatic prediction uses the best eligible full-data model for each feature view according to the current pair-held-out comparison. The table shows each view's feature-complete training rows and cell-line coverage.</p>
+            <div class="model-coverage-wrap" role="region" aria-label="Training coverage by feature view" tabindex="0">
+                <table class="model-coverage-table">
+                    <thead><tr><th>Feature view</th><th>Training rows</th><th>Training cell lines</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">Structure</th><td>426,956</td><td>172 / 172</td></tr>
+                        <tr><th scope="row">Drug Signatures (DS)</th><td>142,024</td><td>165 / 172</td></tr>
+                        <tr><th scope="row">Drug Resistance Signatures (DRS)</th><td>93,840</td><td>170 / 172</td></tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
+            <p class="coverage-note">You can type a drug or cell-line name, or choose a suggestion. DS and DRS have fewer usable rows where matching features are unavailable. The prediction result flags a selected cell line that was not present in that view's training rows.</p>
+            <p>Automatic prediction selects the lowest-error eligible full-data model separately for Structure, DS, and DRS, then marks the best supported view using pair-held-out validation RMSE and cell-line training coverage. The three estimates remain separate predictions, not an ensemble; unavailable features and cell lines outside a view's training coverage are flagged.</p>
+            <p>All automatic choices are based on internal held-out-pair validation. Candidate status means the model has not replaced the separately retained production XGBoost bundle. Independent-study validation is still needed for broader performance claims.</p>
+        </section>
+
     </section>
 
     <!-- AI GUIDE PAGE -->
@@ -521,7 +535,7 @@
         <div class="page-heading">
             <span class="eyebrow">YOUR RESEARCH ACTIVITY</span>
             <h1>Prediction <span class="gradient-text">history.</span></h1>
-            <p>Review your previous drug-combination predictions.</p>
+            <p>Successful predictions are saved in this browser profile only.</p>
         </div>
 
         <div class="history-toolbar">
@@ -533,46 +547,57 @@
             <div class="panel empty-history">
                 <div class="placeholder-icon">◷</div>
                 <h3>Your history will appear here</h3>
-                <p>Sign in and run predictions to build your personal history.</p>
+                <p>Saved predictions stay in this browser's local storage. No account is needed.</p>
                 <button class="button button-primary" data-go="predict">Make a prediction</button>
             </div>
         </div>
     </section>
 
-    <!-- LOGIN PAGE -->
-    <section class="page" id="page-login">
-        <div class="auth-layout">
-            <div class="auth-intro">
-                <span class="eyebrow">WELCOME TO SYNERGIA</span>
-                <h1>Your research.<br><span class="gradient-text">One workspace.</span></h1>
-                <p>Sign in to access your prediction history and continue exploring drug-combination intelligence.</p>
-                <div class="auth-decoration">
-                    <span>✧</span>
-                    <span>⌬</span>
-                    <span>◎</span>
+    <!-- REVIEW PAGE -->
+    <section class="page" id="page-review">
+        <div class="page-heading">
+            <span class="eyebrow">HELP US IMPROVE</span>
+            <h1>Review a <span class="gradient-text">prediction.</span></h1>
+            <p>Share whether a prediction was useful and, if you have experimental evidence, whether it agreed with the observed result.</p>
+        </div>
+
+        <div class="review-layout">
+            <form class="panel review-form" id="review-form">
+                <div class="panel-heading">
+                    <div><h2>Your feedback</h2><p>Choose one of your recent predictions.</p></div>
+                    <span class="panel-icon">✧</span>
                 </div>
-            </div>
+                <label for="review-prediction">Prediction to review</label>
+                <select id="review-prediction" required><option value="">Loading predictions…</option></select>
+                <p class="review-selected-preview" id="review-selected-preview">Select one of your recent predictions to continue.</p>
+                <label for="review-rating">How useful was this result?</label>
+                <select id="review-rating" required>
+                    <option value="5">5 · Very useful</option>
+                    <option value="4">4 · Useful</option>
+                    <option value="3" selected>3 · Somewhat useful</option>
+                    <option value="2">2 · Slightly useful</option>
+                    <option value="1">1 · Not useful</option>
+                </select>
+                <label for="review-outcome">If experimentally checked, how did it compare?</label>
+                <select id="review-outcome" required>
+                    <option value="not_checked">Not experimentally checked</option>
+                    <option value="agrees">It agreed with the observed result</option>
+                    <option value="differs">It differed from the observed result</option>
+                </select>
+                <label for="review-comment">Notes <span class="label-optional">(optional)</span></label>
+                <textarea id="review-comment" rows="4" maxlength="1600" placeholder="What worked well, or what should we investigate?"></textarea>
+                <button class="button button-primary button-full" type="submit" id="review-submit">Save review</button>
+                <p class="table-status" id="review-status" role="status" aria-live="polite"></p>
+            </form>
 
-            <div class="panel auth-panel">
-                <div class="auth-tabs">
-                    <button class="auth-tab active" data-auth-mode="login">Login</button>
-                    <button class="auth-tab" data-auth-mode="register">Create account</button>
+            <div class="panel review-history-panel">
+                <div class="panel-heading">
+                    <div><h2>Your submitted reviews</h2><p>Feedback stays with your browser account.</p></div>
+                    <button class="button button-secondary" id="refresh-reviews" type="button">Refresh</button>
                 </div>
-
-                <h2 id="auth-title">Welcome back!</h2>
-                <p id="auth-description">Enter your details to sign in.</p>
-
-                <form id="auth-form">
-                    <label for="auth-email">Email address</label>
-                    <input id="auth-email" type="email" placeholder="you@example.com" required>
-
-                    <label for="auth-password">Password</label>
-                    <input id="auth-password" type="password" placeholder="Enter your password" required minlength="8">
-
-                    <button type="submit" class="button button-primary button-full" id="auth-submit">Sign in →</button>
-                </form>
-                <p id="auth-message" class="auth-message"></p>
-                <p class="auth-switch" id="auth-switch">New here? <button data-auth-mode="register">Create an account</button></p>
+                <div id="review-list" class="review-list">
+                    <div class="review-empty"><span>✦</span><p>Your submitted reviews will appear here.</p></div>
+                </div>
             </div>
         </div>
     </section>
@@ -608,6 +633,38 @@
     <span>Made for scientific exploration ✧</span>
 </footer>
 
-<script src="/static/app.js?v=20261120-pastel-dna"></script>
+<div class="auth-backdrop hidden" id="auth-backdrop" role="presentation">
+    <section class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+        <button class="auth-close" id="auth-close" type="button" aria-label="Close sign in">×</button>
+        <div class="auth-brand-mark" aria-hidden="true">✦</div>
+        <span class="eyebrow">YOUR RESEARCH WORKSPACE</span>
+        <h2 id="auth-title">Welcome to Synergia</h2>
+        <p class="auth-message" id="auth-message">Create a free account to keep predicting and save your research activity.</p>
+        <div class="auth-tabs" role="tablist" aria-label="Account access">
+            <button class="auth-tab active" id="auth-login-tab" type="button" role="tab" aria-selected="true">Log in</button>
+            <button class="auth-tab" id="auth-signup-tab" type="button" role="tab" aria-selected="false">Sign up</button>
+        </div>
+        <form id="login-form" class="auth-form">
+            <label for="login-identifier">Email or username</label>
+            <input id="login-identifier" name="identifier" autocomplete="username" required>
+            <label for="login-password">Password</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+            <button class="button button-primary button-full" type="submit">Log in</button>
+        </form>
+        <form id="signup-form" class="auth-form hidden">
+            <label for="signup-email">Email</label>
+            <input id="signup-email" name="email" type="email" autocomplete="email" required>
+            <label for="signup-username">Username</label>
+            <input id="signup-username" name="username" autocomplete="username" minlength="3" maxlength="32" required>
+            <label for="signup-password">Password <span class="label-optional">(at least 8 characters)</span></label>
+            <input id="signup-password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+            <button class="button button-primary button-full" type="submit">Create free account</button>
+        </form>
+        <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
+        <small class="auth-footnote">Research prototype accounts are stored locally on this project server.</small>
+    </section>
+</div>
+
+<script src="/static/app.js?v=20261125-model-metrics-1"></script>
 </body>
 </html>
