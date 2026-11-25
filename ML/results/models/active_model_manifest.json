@@ -1,0 +1,69 @@
+{
+  "active_dataset": "DrugComb v1.5 S_sum",
+  "dataset_file": "ML\\data\\processed\\matched_drugcomb_v1_5_ssum.csv",
+  "rows": 426956,
+  "columns": 19,
+  "cell_lines": 172,
+  "feature_cell_line_coverage": {
+    "structure": {
+      "rows": 426956,
+      "cell_lines": 172
+    },
+    "ds": {
+      "rows": 142024,
+      "cell_lines": 165
+    },
+    "drs": {
+      "rows": 93840,
+      "cell_lines": 170
+    }
+  },
+  "target": "S_sum",
+  "score_clipping_sigma": 3.0,
+  "validation_source": "ML\\results\\drugcomb_v1_5_ssum_full_xgb_pair_cv",
+  "validation_folds": 3,
+  "validation_repeats": 1,
+  "models": {
+    "structure": {
+      "file": "structure__xgboost.joblib",
+      "training_rows": 426956,
+      "validation_rows": 426956,
+      "validation_clip3_rmse": 19.68133102771854,
+      "validation_clip3_r2": 0.2874695527001923,
+      "validation_clip3_spearman": 0.4852036899473851,
+      "validation_auc_s_ge_10": 0.7221972341931145,
+      "validation_f1_s_ge_10": 0.3777984134862657,
+      "training_cell_lines": 172
+    },
+    "ds": {
+      "file": "ds__xgboost.joblib",
+      "training_rows": 142024,
+      "validation_rows": 142024,
+      "validation_clip3_rmse": 19.429913915431413,
+      "validation_clip3_r2": 0.483698425022779,
+      "validation_clip3_spearman": 0.6526137514262788,
+      "validation_auc_s_ge_10": 0.7986264625928973,
+      "validation_f1_s_ge_10": 0.5556177565918412,
+      "training_cell_lines": 165
+    },
+    "drs": {
+      "file": "drs__xgboost.joblib",
+      "training_rows": 93840,
+      "validation_rows": 93840,
+      "validation_clip3_rmse": 20.878493156814727,
+      "validation_clip3_r2": 0.4574112715656649,
+      "validation_clip3_spearman": 0.6562928006495176,
+      "validation_auc_s_ge_10": 0.8012647758131776,
+      "validation_f1_s_ge_10": 0.5850201972177765,
+      "training_cell_lines": 170
+    }
+  },
+  "context_file": "feature_context_v1_5_ssum.joblib",
+  "previous_models_archive": "models\\archive\\before_v1_5_ssum_promotion_20261124T103031950557Z",
+  "archived_files": [
+    "structure__xgboost.joblib",
+    "ds__xgboost.joblib",
+    "drs__xgboost.joblib"
+  ],
+  "note": "The three views predict the same v1.5 S_sum target. Scores are internal pair-held-out validation and are not independent-study validation."
+}
